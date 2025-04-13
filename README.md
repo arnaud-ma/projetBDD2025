@@ -29,7 +29,7 @@
     uv sync
     ```
 
-    Puis `source .env/bin/activate` sur Linux ou MacOS, ou `.env\Scripts\activate` sur Windows pour activer l'environnement virtuel.
+    Puis `source .venv/bin/activate` sur Linux ou MacOS, ou `.venv\Scripts\activate` sur Windows pour activer l'environnement virtuel.
 
 4. Pour faire des commandes django
 
