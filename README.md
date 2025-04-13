@@ -23,7 +23,7 @@
     powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
     ```
 
-3. Installer les dépendances :
+3. Installer les dépendances et/ou python :
 
     ```bash
     uv sync
