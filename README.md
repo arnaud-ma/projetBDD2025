@@ -1,5 +1,9 @@
 # Projet base de données 2025
 
+## Schéma de la base de données
+
+[lien vers drawdb](https://www.drawdb.app/editor?shareId=a5b369f72108dc1c10a7b253fe8c6a21)
+
 ## Installation
 
 1. Cloner le dépôt :
