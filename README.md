@@ -2,7 +2,7 @@
 
 ## Schéma de la base de données
 
-[lien vers drawdb](https://www.drawdb.app/editor?shareId=a5b369f72108dc1c10a7b253fe8c6a21)
+[lien vers drawdb](https://www.drawdb.app/editor?shareId=d45227d5d346325c65aa84d16d8766b3)
 
 ## Installation
 
