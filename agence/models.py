@@ -27,7 +27,7 @@ class InfosBien(models.Model):
 
     def __str__(self):
         return (
-            f"InfosBien à {self.id_lieu.adresse}, {self.id_lieu.code_commune}: "
+            f"InfosBien à {self.id_lieu}: "
             f"{self.nb_chambres} chambres, "
             f"{self.surface_habitable} m² habitable, "
             f"{self.surface_terrain} m² terrain"
@@ -46,7 +46,7 @@ class Utilisateur(models.Model):
 
 class Acheteur(models.Model):
     id_utilisateur = models.OneToOneField(Utilisateur, models.CASCADE, primary_key=True)
-    id_critere_recherche = models.ForeignKey(InfosBien, models.PROTECT, null=True)
+    id_critere_recherche = models.ForeignKey(InfosBien, models.CASCADE, null=True)
 
     def __str__(self):
         return f"Compte acheteur de {self.id_utilisateur}"
@@ -74,11 +74,8 @@ class Bien(models.Model):
     id_vendeur = models.ForeignKey(Vendeur, models.CASCADE)
 
     def __str__(self):
-        return (
-            f"Bien à {self.infos_bien.id_lieu.adresse}, {self.infos_bien.id_lieu.code_commune}: "
-            f"{self.etat_bien}, "
-            f"vendeur: {self.id_vendeur}"
-        )
+        result = "" if self.infos_bien is None else f"Bien à {self.infos_bien.id_lieu}: "
+        return f"{result}etat:{self.etat_bien.label}, vendeur: {self.id_vendeur}"
 
 
 class FaitAchat(models.Model):
