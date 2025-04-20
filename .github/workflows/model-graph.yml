@@ -1,0 +1,28 @@
+name: Generate model graph
+
+on:
+  workflow_dispatch:
+
+jobs:
+  generate-model-graph:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: setup python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+
+      - name: setup graphviz
+        uses: ts-graphviz/setup-graphviz@v2
+
+      - name: install dependencies
+        run: uv sync
+
+      - name: generate model graph
+        run:
+          uv run manage.py graph_models | dot -Tsvg > database_schema.svg

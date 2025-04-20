@@ -142,4 +142,53 @@ class FaitAchat(models.Model):
         )
 
 
+class RendezVous(models.Model):
+    fait_achat = models.ForeignKey(FaitAchat, models.CASCADE)
+    objet = models.CharField(max_length=255)
+    commentaire = models.TextField(blank=True, default="")
+    date = models.DateTimeField()
+    lieu = models.ForeignKey(Lieu, models.PROTECT, null=True)
+    agent = models.ForeignKey(Agent, models.CASCADE, null=True)
+
+    def __str__(self):
+        return f"Rendez-vous pour {self.fait_achat} ({self.date})"
+
+
+class Avis(models.Model):
+    fait_achat = models.ForeignKey(FaitAchat, models.CASCADE)
+    commentaire = models.TextField(blank=True, default="")
+    date = models.DateTimeField()
+
+    def __str__(self):
+        return f"Avis pour {self.fait_achat} ({self.date})"
+
+
 # endregion
+# ---------------------------------------------------------------------------- #
+#                           interaction client-agent                           #
+# ---------------------------------------------------------------------------- #
+
+
+class AgentClient(models.Model):
+    agent = models.ForeignKey(Agent, models.CASCADE)
+    client = models.ForeignKey(Acheteur, models.CASCADE)
+
+    class TypeClient(models.TextChoices):
+        ACHETEUR = "A"
+        VENDEUR = "V"
+
+    type_client = models.CharField(
+        max_length=1, choices=TypeClient.choices, default=TypeClient.ACHETEUR
+    )
+
+    def __str__(self):
+        return f"{self.agent} - {self.client} ({self.type_client.label})"
+
+
+class Message(models.Model):
+    agent_client = models.ForeignKey(AgentClient, models.CASCADE)
+    date = models.DateTimeField()
+    message = models.TextField(blank=True, default="")
+
+    def __str__(self):
+        return f"Message entre {self.agent_client} ({self.date})"
