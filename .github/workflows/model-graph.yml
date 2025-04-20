@@ -34,3 +34,5 @@ jobs:
           git add database_schema.svg
           git commit -m "Update model graph" && git push origin HEAD:refs/heads/main || echo "No changes to commit"
         continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
