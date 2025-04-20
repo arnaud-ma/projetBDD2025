@@ -3,6 +3,9 @@ name: Generate model graph
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   generate-model-graph:
     runs-on: ubuntu-latest
