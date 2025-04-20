@@ -26,3 +26,11 @@ jobs:
       - name: generate model graph
         run:
           uv run manage.py graph_models | dot -Tsvg > database_schema.svg
+
+      - name: commit model graph
+        run: |
+          git config --local user.name "GitHub Actions"
+          git config --local user.email "github-actions@users.noreply.github.com"
+          git add database_schema.svg
+          git commit -m "Update model graph" && git push origin HEAD:refs/heads/main || echo "No changes to commit"
+        continue-on-error: true
