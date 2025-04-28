@@ -1,84 +1,174 @@
 
 from django.db import models
+from django.db.models import CharField   # j'ai apporté une pétite modification
+from phonenumber_field.modelfields import PhoneNumberField
 
-class Vendeur(models.Model):
-    nom = models.CharField(max_length=100)
-    prenom = models.CharField(max_length=100)
-    email = models.EmailField()
-    telephone = models.CharField(max_length=20)
+# Create your models here.
 
-    def __str__(self):
-        return f"{self.prenom} {self.nom}"
 
-class Acheteur(models.Model):
-    nom = models.CharField(max_length=100)
-    prenom = models.CharField(max_length=100)
-    email = models.EmailField()
-    telephone = models.CharField(max_length=20)
+# ---------------------------------------------------------------------------- #
+#                              region localisation                             #
+# ---------------------------------------------------------------------------- #
 
-    def __str__(self):
-        return f"{self.prenom} {self.nom}"
 
-class AgentImmobilier(models.Model):
-    nom = models.CharField(max_length=100)
-    prenom = models.CharField(max_length=100)
-    email = models.EmailField()
-    telephone = models.CharField(max_length=20)
+class Lieu(models.Model):
+    longitude = models.FloatField()
+    latitude = models.FloatField()
+    adresse = models.CharField(max_length=255, blank=True, default="")
+    details = models.TextField(blank=True, default="")
+    code_commune = models.CharField(max_length=5)
 
     def __str__(self):
-        return f"{self.prenom} {self.nom}"
+        return f"{self.adresse} ({self.code_commune}): {(self.latitude, self.longitude)}" #Il y avait une parenthèse en trop à la fin
+
+
+class Agence(models.Model):
+    nom = models.CharField(max_length=255)     # j'ai apporté une pétite modification
+    lieu = models.ForeignKey(Lieu, models.CASCADE) # j'ai enlevé id vu que django meme gère id en base 
+
+    def __str__(self):
+        return f"{self.nom} située à {self.lieu}"
+
+
+# endregion
+# ---------------------------------------------------------------------------- #
+#                                  region Bien                                 #
+# ---------------------------------------------------------------------------- #
+
+
+class InfosBien(models.Model):
+    nb_chambres = models.IntegerField(null=True)
+    nb_salles_bain = models.IntegerField(null=True)
+    nb_garages = models.IntegerField(null=True)
+    nb_cuisines = models.IntegerField(null=True)
+    nb_wc = models.IntegerField(null=True)
+    surface_habitable = models.FloatField(null=True)
+    surface_terrain = models.FloatField(null=True)
+    lieu = models.ForeignKey(Lieu, models.PROTECT, null=True)
+
+    def __str__(self):
+        return (
+            f"InfosBien à {self.lieu}: "
+            f"{self.nb_chambres} chambres, "
+            f"{self.surface_habitable} m² habitable, "
+            f"{self.surface_terrain} m² terrain"
+        )
+
 
 class Bien(models.Model):
-    TYPE_CHOIX = [
-        ('Appartement', 'Appartement'),
-        ('Maison', 'Maison'),
-        ('Terrain', 'Terrain'),
-    ]
-    titre = models.CharField(max_length=200)
-    description = models.TextField()
-    adresse = models.CharField(max_length=200)
-    ville = models.CharField(max_length=100)
-    prix = models.DecimalField(max_digits=12, decimal_places=2)
-    surface = models.FloatField()
-    type_bien = models.CharField(max_length=20, choices=TYPE_CHOIX)
-    vendeur = models.ForeignKey(Vendeur, on_delete=models.CASCADE, related_name='biens')
+    class Etat(models.TextChoices):
+        PROSPECTION = "PR"
+        ESTIMATION = "ES"
+        MISE_EN_VENTE = "MV"
+        SIGNATURE_COMPROMIS = "SC"
+        SIGNATURE_VENTE = "SV"
+
+    etat = models.CharField(
+        max_length=2, choices=Etat.choices, default=Etat.PROSPECTION
+    )
+    infos_bien = models.ForeignKey(InfosBien, models.PROTECT, null=True)
+    vendeur = models.ForeignKey("Vendeur", models.CASCADE)
+    agent = models.ForeignKey("Agent", models.CASCADE)
 
     def __str__(self):
-        return self.titre
+        attrs = {"vendeur": self.vendeur, "etat_bien": self.etat.label}
+        if self.infos_bien:
+            attrs["infos_bien"] = self.infos_bien
+        return ", ".join(f"{k}: {v}" for k, v in attrs.items()) + f" ({self.pk})"
 
-class CritereRecherche(models.Model):
-    acheteur = models.ForeignKey(Acheteur, on_delete=models.CASCADE, related_name='criteres')
-    ville = models.CharField(max_length=100, blank=True, null=True)
-    min_prix = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
-    max_prix = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
-    type_bien = models.CharField(max_length=20, choices=Bien.TYPE_CHOIX, blank=True, null=True)
-    min_surface = models.FloatField(blank=True, null=True)
+
+# endregion
+# ---------------------------------------------------------------------------- #
+#                              region Utilisateur                              #
+# ---------------------------------------------------------------------------- #
+
+
+class Utilisateur(models.Model):
+    nom = models.CharField(max_length=255)
+    prenom = models.CharField(max_length=255)
+    telephone = PhoneNumberField(blank=True)
+    email = models.EmailField()
+
+    def __str__(self):     ### ici selon moi j'ai vu qu'on faisait peu de choses en plusieurs étapes donc j'ai réecrit ici,le tien était déjà parfait quand meme!.
+        coords = ", ".join(str(c) for c in (self.email, self.telephone) if c)
+        return f"{self.prenom} {self.nom} ({coords})"
+
+
+class Vendeur(Utilisateur):
+    pass
+
+
+class Acheteur(Utilisateur):
+    critere_recherche = models.ForeignKey(InfosBien, models.CASCADE, null=True)
+
+
+class Agent(Utilisateur):
+    agence = models.ForeignKey(Agence, models.CASCADE)
 
     def __str__(self):
-        return f"Critères de {self.acheteur}"
+        return f"{super().__str__()}, agence: {self.agence}"
 
-class Visite(models.Model):
-    acheteur = models.ForeignKey(Acheteur, on_delete=models.CASCADE)
-    bien = models.ForeignKey(Bien, on_delete=models.CASCADE)
-    date_visite = models.DateTimeField()
+
+# endregion
+# ---------------------------------------------------------------------------- #
+#                      region Interaction acheteur - bien                      #
+# ---------------------------------------------------------------------------- #
+
+
+class FaitAchat(models.Model):
+    bien = models.ForeignKey(Bien, models.CASCADE)
+    acheteur = models.ForeignKey(Acheteur, models.CASCADE)
+
+    class EtapeAchat(models.IntegerChoices):
+        PROSPECTION = 1
+        PROPOSITION = 2
+        VISITE = 3
+        INTERET = 4
+        OFFRE = 5
+        NEGOCIATION = 6
+        COMPROMIS_SIGNE = 7, "Compromis Signé"
+        FINANCEMENT = 8
+        ACTE_SIGNE = 9, "Acte Signé"
+        REFUSE = 10, "Refusé"
+        ABANDON = 11
+
+    etape_achat = models.IntegerField(choices=EtapeAchat.choices)
 
     def __str__(self):
-        return f"Visite de {self.acheteur} pour {self.bien}"
+        return (
+            f"Fait achat de {self.acheteur} "
+            f"pour le bien {self.bien} "
+            f"({self.etape_achat.label})"
+        )
 
-class Vente(models.Model):
-    acheteur = models.ForeignKey(Acheteur, on_delete=models.CASCADE)
-    bien = models.OneToOneField(Bien, on_delete=models.CASCADE)
-    date_vente = models.DateField()
-    prix_vente = models.DecimalField(max_digits=12, decimal_places=2)
-
-    def __str__(self):
-        return f"{self.bien} vendu à {self.acheteur}"
 
 class RendezVous(models.Model):
-    vendeur = models.ForeignKey(Vendeur, on_delete=models.CASCADE)
-    agent = models.ForeignKey(AgentImmobilier, on_delete=models.CASCADE)
-    date_heure = models.DateTimeField()
-    sujet = models.CharField(max_length=200)
+    fait_achat = models.ForeignKey(FaitAchat, models.CASCADE)
+    objet = models.CharField(max_length=255)
+    commentaire = models.TextField(blank=True, default="")
+    date = models.DateTimeField()
+    lieu = models.ForeignKey(Lieu, models.PROTECT, null=True)
 
     def __str__(self):
-        return f"RDV entre {self.agent} et {self.vendeur} le {self.date_heure}"
+        return f"Rendez-vous pour {self.fait_achat} ({self.date})"
+
+
+class Avis(models.Model):
+    fait_achat = models.ForeignKey(FaitAchat, models.CASCADE)
+    commentaire = models.TextField(blank=True, default="")
+    date = models.DateTimeField()
+
+    def __str__(self):
+        return f"Avis pour {self.fait_achat} ({self.date})"
+
+
+class Message(models.Model):
+    date = models.DateTimeField()
+    contenu = models.TextField(blank=True, default="")
+    utilisateur = models.ForeignKey(Utilisateur, models.CASCADE)
+    fait_achat = models.ForeignKey(FaitAchat, models.CASCADE)
+
+    def __str__(self):
+        return f"Message de {self.utilisateur} pour {self.fait_achat} ({self.date})"
+
+# endregion
