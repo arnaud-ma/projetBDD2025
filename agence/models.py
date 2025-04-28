@@ -67,7 +67,7 @@ class Bien(models.Model):
     )
     infos_bien = models.ForeignKey(InfosBien, models.PROTECT, null=True)
     vendeur = models.ForeignKey("Vendeur", models.CASCADE)
-    agent = models.ForeignKey("Agent", models.CASCADE)
+    agent = models.ForeignKey("Agent", models.CASCADE, null=True)  # TODO: remove null=True
 
     def __str__(self):
         attrs = {"vendeur": self.vendeur, "etat_bien": self.etat.label}

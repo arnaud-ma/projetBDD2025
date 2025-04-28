@@ -2,9 +2,40 @@
 from django.http import HttpResponse
 from django.shortcuts import render
 
+from agence.forms import UtilisateurForm
+
+from .models import Acheteur, Utilisateur, Vendeur
+
 
 def index(request):
-    return HttpResponse(
-        "<p>Cette vue est une page d'accueil basique pour l'application "
-        "<code>application1</code> de mon projet.</p>"
-    )
+    return render(request, "agence/index.html")
+
+
+def list_users(request):
+    user_list = Utilisateur.objects.all()
+    context = {
+        "user_list": user_list,
+    }
+    return render(request, "agence/list_users.html", context)
+
+
+def create_user(request):
+    if request.method == "POST":
+        form = UtilisateurForm(request.POST)
+        if form.is_valid():
+            utilisateur = form.save()
+            if form.type_utilisateur == "Acheteur":
+                obj = Acheteur
+            elif form.type_utilisateur == "Vendeur":
+                obj = Vendeur
+            else:
+                raise ValueError("Invalid type_utilisateur")
+
+            user_instance = obj.objects.create(utilisateur_ptr=utilisateur)
+            user_instance.__dict__.update(utilisateur.__dict__)
+            user_instance.save()
+            return HttpResponse("Utilisateur créé avec succès !")
+    else:
+        form = UtilisateurForm()
+
+    return render(request, "agence/create_user.html", {"form": form})
