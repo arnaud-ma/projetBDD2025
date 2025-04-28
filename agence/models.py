@@ -173,6 +173,3 @@ class Message(models.Model):
         return f"Message de {self.utilisateur} pour {self.fait_achat} ({self.date})"
 
 # endregion
-# ---------------------------------------------------------------------------- #
-#                           interaction client-agent                           #
-# ---------------------------------------------------------------------------- #
