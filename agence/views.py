@@ -20,7 +20,7 @@ def list_users(request):
 
 
 def create_user(request):
-    if request.method == "POST": # c'est lutisateur qui remplie la requete
+    if request.method == "POST":  # c'est lutisateur qui remplie la requete
         form = UtilisateurForm(request.POST)
         if form.is_valid():
             utilisateur = form.save()

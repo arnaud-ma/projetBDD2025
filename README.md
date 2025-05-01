@@ -36,8 +36,13 @@
     Puis `source .venv/bin/activate` sur Linux ou MacOS, ou `.venv\Scripts\activate` sur Windows pour activer l'environnement virtuel.
 
 4. Pour faire des commandes django(très important !!!)
-   
 
     ```bash
     uv run manage.py <command>
     ```
+
+## TODO:
+
+- [ ] formulaire pour créer une nouvelle agence
+- [ ] ajouter création d'un agent dans formulaire pour créer utilsisateur
+- [ ] Ne plus avoir d'erreur quand un utilisateur déjà vendeur veut s'inscrire en tant qu'acheteur
