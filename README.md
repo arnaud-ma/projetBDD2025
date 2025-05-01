@@ -43,6 +43,7 @@
 
 ## TODO
 
+- [X] Formulaire pour créer un utilisateur
 - [ ] formulaire pour créer une nouvelle agence (**Arnaud**)
 - [ ] ajouter création d'un agent dans formulaire pour créer utilsisateur (**Arnaud**)
 - [ ] Ne plus avoir d'erreur quand un utilisateur déjà vendeur veut s'inscrire en tant qu'acheteur (**Prosper**)
