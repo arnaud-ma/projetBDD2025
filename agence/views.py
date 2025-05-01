@@ -24,9 +24,10 @@ def create_user(request):
         form = UtilisateurForm(request.POST)
         if form.is_valid():
             utilisateur = form.save()
-            if form.type_utilisateur == "Acheteur":
+            type_utilisateur = form.cleaned_data["type_utilisateur"]
+            if type_utilisateur == "1":
                 obj = Acheteur
-            elif form.type_utilisateur == "Vendeur":
+            elif type_utilisateur == "2":
                 obj = Vendeur
             else:
                 raise ValueError("Invalid type_utilisateur")
