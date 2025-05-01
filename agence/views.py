@@ -30,7 +30,8 @@ def create_user(request):
             elif type_utilisateur == "2":
                 obj = Vendeur
             else:
-                raise ValueError("Invalid type_utilisateur")
+                msg = f"Invalid type_utilisateur: {type_utilisateur}"
+                raise ValueError(msg)
 
             user_instance = obj.objects.create(utilisateur_ptr=utilisateur)
             user_instance.__dict__.update(utilisateur.__dict__)

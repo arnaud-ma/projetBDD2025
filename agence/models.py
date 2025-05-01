@@ -84,8 +84,8 @@ class Bien(models.Model):
 class Utilisateur(models.Model):
     nom = models.CharField(max_length=255)
     prenom = models.CharField(max_length=255)
-    telephone = PhoneNumberField(blank=True)
-    email = models.EmailField()
+    telephone = PhoneNumberField(blank=True, unique=True, default=None)
+    email = models.EmailField(unique=True)
 
     def __str__(self):
         coords = (self.email, self.telephone)
