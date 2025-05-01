@@ -35,7 +35,8 @@
 
     Puis `source .venv/bin/activate` sur Linux ou MacOS, ou `.venv\Scripts\activate` sur Windows pour activer l'environnement virtuel.
 
-4. Pour faire des commandes django
+4. Pour faire des commandes django(très important !!!)
+   
 
     ```bash
     uv run manage.py <command>
