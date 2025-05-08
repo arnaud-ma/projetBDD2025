@@ -1,15 +1,93 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Create User</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Créer un utilisateur</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .container {
+            width: 50%;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+        input, select, button {
+            padding: 10px;
+            font-size: 14px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
 <body>
-    <h1>Create User</h1>
-    <form method="post">
-        {% csrf_token %}
-        {{ form }}
-        <button type="submit">Submit</button>
-    </form>
+    <h1>Création d'un utilisateur</h1>
+    <div class="container">
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li style="color: green;">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            
+            <!-- Ajout de chaque champ du formulaire avec un label -->
+            <div>
+                <label for="{{ form.nom.id_for_label }}">Nom :</label>
+                {{ form.nom }}
+            </div>
+            <div>
+                <label for="{{ form.prenom.id_for_label }}">Prénom :</label>
+                {{ form.prenom }}
+            </div>
+            <div>
+                <label for="{{ form.telephone.id_for_label }}">Téléphone :</label>
+                {{ form.telephone }}
+            </div>
+            <div>
+                <label for="{{ form.email.id_for_label }}">Email :</label>
+                {{ form.email }}
+            </div>
+            <div>
+                <label for="{{ form.type_utilisateur.id_for_label }}">Type d'utilisateur :</label>
+                {{ form.type_utilisateur }}
+            </div>
+            
+            <!-- Bouton de soumission -->
+            <button type="submit">Soumettre</button>
+        </form>
+    </div>
 </body>
 </html>

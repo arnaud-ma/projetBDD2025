@@ -80,18 +80,24 @@ class Bien(models.Model):
 #                              region Utilisateur                              #
 # ---------------------------------------------------------------------------- #
 
+TYPE_CHOICES = [
+    ('1', 'Acheteur'),
+    ('2', 'Vendeur'),
+]
 
 class Utilisateur(models.Model):
     nom = models.CharField(max_length=255)
     prenom = models.CharField(max_length=255)
     telephone = PhoneNumberField(blank=True, unique=True, default=None)
     email = models.EmailField(unique=True)
+    type_utilisateur = models.CharField(max_length=1, choices=TYPE_CHOICES, default='1')  # <-- ajout ici
 
     def __str__(self):
         coords = (self.email, self.telephone)
         coords = filter(None, coords)
         coords_str = ", ".join(map(str, coords))
         return f"{self.prenom} {self.nom} ({coords_str})"
+
 
 
 class Vendeur(Utilisateur):

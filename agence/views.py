@@ -1,15 +1,12 @@
-# Create your views here.
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.contrib import messages  # <- Ajouté
 
 from agence.forms import UtilisateurForm
-
 from .models import Acheteur, Utilisateur, Vendeur
-
 
 def index(request):
     return render(request, "agence/index.html")
-
 
 def list_users(request):
     user_list = Utilisateur.objects.all()
@@ -18,25 +15,30 @@ def list_users(request):
     }
     return render(request, "agence/list_users.html", context)
 
-
 def create_user(request):
-    if request.method == "POST":  # c'est lutisateur qui remplie la requete
+    if request.method == "POST":
         form = UtilisateurForm(request.POST)
         if form.is_valid():
-            utilisateur = form.save()
+            utilisateur = form.save(commit=False)
             type_utilisateur = form.cleaned_data["type_utilisateur"]
             if type_utilisateur == "1":
-                obj = Acheteur
+                user_instance = Acheteur()
             elif type_utilisateur == "2":
-                obj = Vendeur
+                user_instance = Vendeur()
             else:
-                msg = f"Invalid type_utilisateur: {type_utilisateur}"
-                raise ValueError(msg)
+                messages.error(request, "Type d'utilisateur invalide.")
+                return render(request, "agence/create_user.html", {"form": form})
 
-            user_instance = obj.objects.create(utilisateur_ptr=utilisateur)
-            user_instance.__dict__.update(utilisateur.__dict__)
+            user_instance.nom = utilisateur.nom
+            user_instance.prenom = utilisateur.prenom
+            user_instance.email = utilisateur.email
+            user_instance.telephone = utilisateur.telephone
             user_instance.save()
-            return HttpResponse("Utilisateur créé avec succès !")
+
+            messages.success(request, "✅ Utilisateur créé avec succès !")
+            return render(request, "agence/create_user.html", {"form": UtilisateurForm()})
+        else:
+            messages.error(request, "⚠️ Veuillez corriger les erreurs ci-dessous.")
     else:
         form = UtilisateurForm()
 

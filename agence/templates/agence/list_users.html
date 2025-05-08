@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User List</title>
+    <title>Liste des Utilisateurs</title>
     <style>
         table {
             width: 100%;
@@ -19,7 +19,7 @@
     </style>
 </head>
 <body>
-    <h1>User List</h1>
+    <h1>Liste des Utilisateurs</h1>
     <table>
         <thead>
             <tr>
@@ -28,19 +28,27 @@
                 <th>Prénom</th>
                 <th>Email</th>
                 <th>Téléphone</th>
+                <th>Type d'utilisateur</th>
             </tr>
         </thead>
         <tbody>
             {% for user in user_list %}
-            <tr>
-                <td>{{ user.id }}</td>
-                <td>{{ user.prenom }}</td>
-                <td>{{ user.nom }}</td>
-                <td>{{ user.email }}</td>
-                <td>{{ user.telephone }}</td>
-            </tr>
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.nom }}</td>
+                    <td>{{ user.prenom }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.telephone }}</td>
+                    <td>{{ user.get_type_utilisateur_display }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6">Aucun utilisateur trouvé.</td>
+                </tr>
             {% endfor %}
         </tbody>
     </table>
+    <br>
+    <a href="/">Retour à l'accueil</a>
 </body>
 </html>
