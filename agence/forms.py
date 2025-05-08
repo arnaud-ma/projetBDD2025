@@ -14,6 +14,6 @@ class UtilisateurForm(forms.ModelForm):
     )
     class Meta:
         model = models.Utilisateur
-        fields: ClassVar = ["nom", "prenom", "email", "telephone"]
+        fields: ClassVar = ["nom", "prenom", "email", "telephone","type_utilisateur"]
 
     

@@ -90,14 +90,18 @@ class Utilisateur(models.Model):
     prenom = models.CharField(max_length=255)
     telephone = PhoneNumberField(blank=True, unique=True, default=None)
     email = models.EmailField(unique=True)
-    type_utilisateur = models.CharField(max_length=1, choices=TYPE_CHOICES, default='1')  # <-- ajout ici
+    type_utilisateur = models.CharField(max_length=1, choices=TYPE_CHOICES, default='1')  
+
 
     def __str__(self):
+        return f"{self.prenom} {self.nom} ({self.email}, {self.telephone}, {self.get_type_utilisateur_display()})"
+
+    '''def __str__(self):
         coords = (self.email, self.telephone)
         coords = filter(None, coords)
         coords_str = ", ".join(map(str, coords))
         return f"{self.prenom} {self.nom} ({coords_str})"
-
+'''
 
 
 class Vendeur(Utilisateur):

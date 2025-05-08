@@ -33,6 +33,7 @@ def create_user(request):
             user_instance.prenom = utilisateur.prenom
             user_instance.email = utilisateur.email
             user_instance.telephone = utilisateur.telephone
+            user_instance.type_utilisateur = type_utilisateur
             user_instance.save()
 
             messages.success(request, "✅ Utilisateur créé avec succès !")
