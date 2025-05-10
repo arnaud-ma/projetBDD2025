@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 from django.db import models
 from django.forms import CharField
 from phonenumber_field.modelfields import PhoneNumberField
@@ -61,9 +63,7 @@ class Bien(models.Model):
         SIGNATURE_COMPROMIS = "SC"
         SIGNATURE_VENTE = "SV"
 
-    etat = models.CharField(
-        max_length=2, choices=Etat.choices, default=Etat.PROSPECTION
-    )
+    etat = models.CharField(max_length=2, choices=Etat.choices, default=Etat.PROSPECTION)
     infos_bien = models.ForeignKey(InfosBien, models.PROTECT, null=True)
     vendeur = models.ForeignKey("Vendeur", models.CASCADE)
     agent = models.ForeignKey("Agent", models.CASCADE, null=True)  # TODO: remove null=True
@@ -80,28 +80,29 @@ class Bien(models.Model):
 #                              region Utilisateur                              #
 # ---------------------------------------------------------------------------- #
 
-TYPE_CHOICES = [
-    ('1', 'Acheteur'),
-    ('2', 'Vendeur'),
-]
 
 class Utilisateur(models.Model):
     nom = models.CharField(max_length=255)
     prenom = models.CharField(max_length=255)
     telephone = PhoneNumberField(blank=True, unique=True, default=None)
     email = models.EmailField(unique=True)
-    type_utilisateur = models.CharField(max_length=1, choices=TYPE_CHOICES, default='1')  
 
+    TYPE_CHOICES: ClassVar = [
+        ("1", "Acheteur"),
+        ("2", "Vendeur"),
+    ]
+
+    type_utilisateur = models.CharField(max_length=1, choices=TYPE_CHOICES, default="1")
 
     def __str__(self):
-        return f"{self.prenom} {self.nom} ({self.email}, {self.telephone}, {self.get_type_utilisateur_display()})"
+        coords = (self.email, self.telephone)  # récupérer les coordonnées
+        coords = filter(None, coords)  # filtrer les coordonnées vides
+        coords_str = ", ".join(map(str, coords))  # convertir en chaîne
+        if coords_str:
+            # s'il existe au moins une coordonnée, ajouter des parenthèses
+            coords_str = f" ({coords_str})"
 
-    '''def __str__(self):
-        coords = (self.email, self.telephone)
-        coords = filter(None, coords)
-        coords_str = ", ".join(map(str, coords))
-        return f"{self.prenom} {self.nom} ({coords_str})"
-'''
+        return f"{self.prenom} {self.nom} {coords_str}"
 
 
 class Vendeur(Utilisateur):
@@ -145,11 +146,7 @@ class FaitAchat(models.Model):
     etape_achat = models.IntegerField(choices=EtapeAchat.choices)
 
     def __str__(self):
-        return (
-            f"Fait achat de {self.acheteur} "
-            f"pour le bien {self.bien} "
-            f"({self.etape_achat.label})"
-        )
+        return f"Fait achat de {self.acheteur} pour le bien {self.bien} ({self.etape_achat.label})"
 
 
 class RendezVous(models.Model):
@@ -180,5 +177,6 @@ class Message(models.Model):
 
     def __str__(self):
         return f"Message de {self.utilisateur} pour {self.fait_achat} ({self.date})"
+
 
 # endregion

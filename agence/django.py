@@ -1,6 +1,5 @@
-
 from django.db import models
-from django.db.models import CharField   # j'ai apporté une pétite modification
+from django.db.models import CharField  # j'ai apporté une pétite modification
 from phonenumber_field.modelfields import PhoneNumberField
 
 # Create your models here.
@@ -19,12 +18,14 @@ class Lieu(models.Model):
     code_commune = models.CharField(max_length=5)
 
     def __str__(self):
-        return f"{self.adresse} ({self.code_commune}): {(self.latitude, self.longitude)}" #Il y avait une parenthèse en trop à la fin
+        return f"{self.adresse} ({self.code_commune}): {(self.latitude, self.longitude)}"  # Il y avait une parenthèse en trop à la fin
 
 
 class Agence(models.Model):
-    nom = models.CharField(max_length=255)     # j'ai apporté une pétite modification
-    lieu = models.ForeignKey(Lieu, models.CASCADE) # j'ai enlevé id vu que django meme gère id en base 
+    nom = models.CharField(max_length=255)  # j'ai apporté une pétite modification
+    lieu = models.ForeignKey(
+        Lieu, models.CASCADE
+    )  # j'ai enlevé id vu que django meme gère id en base
 
     def __str__(self):
         return f"{self.nom} située à {self.lieu}"
@@ -63,9 +64,7 @@ class Bien(models.Model):
         SIGNATURE_COMPROMIS = "SC"
         SIGNATURE_VENTE = "SV"
 
-    etat = models.CharField(
-        max_length=2, choices=Etat.choices, default=Etat.PROSPECTION
-    )
+    etat = models.CharField(max_length=2, choices=Etat.choices, default=Etat.PROSPECTION)
     infos_bien = models.ForeignKey(InfosBien, models.PROTECT, null=True)
     vendeur = models.ForeignKey("Vendeur", models.CASCADE)
     agent = models.ForeignKey("Agent", models.CASCADE)
@@ -89,7 +88,9 @@ class Utilisateur(models.Model):
     telephone = PhoneNumberField(blank=True)
     email = models.EmailField()
 
-    def __str__(self):     ### ici selon moi j'ai vu qu'on faisait peu de choses en plusieurs étapes donc j'ai réecrit ici,le tien était déjà parfait quand meme!.
+    def __str__(
+        self,
+    ):  ### ici selon moi j'ai vu qu'on faisait peu de choses en plusieurs étapes donc j'ai réecrit ici,le tien était déjà parfait quand meme!.
         coords = ", ".join(str(c) for c in (self.email, self.telephone) if c)
         return f"{self.prenom} {self.nom} ({coords})"
 
@@ -135,11 +136,7 @@ class FaitAchat(models.Model):
     etape_achat = models.IntegerField(choices=EtapeAchat.choices)
 
     def __str__(self):
-        return (
-            f"Fait achat de {self.acheteur} "
-            f"pour le bien {self.bien} "
-            f"({self.etape_achat.label})"
-        )
+        return f"Fait achat de {self.acheteur} pour le bien {self.bien} ({self.etape_achat.label})"
 
 
 class RendezVous(models.Model):
@@ -170,5 +167,6 @@ class Message(models.Model):
 
     def __str__(self):
         return f"Message de {self.utilisateur} pour {self.fait_achat} ({self.date})"
+
 
 # endregion

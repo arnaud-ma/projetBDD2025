@@ -55,36 +55,40 @@
         {% if messages %}
             <ul>
                 {% for message in messages %}
-                    <li style="color: green;">{{ message }}</li>
+                    <!-- On peut utiliser le niveau du message pour changer la couleur -->
+                     <li style="color: {% if message.tags == 'error' %}red{% elif message.tags == 'success' %}green{% else %}black{% endif %};">
+                        {{ message }}
+                    </li>
                 {% endfor %}
             </ul>
         {% endif %}
 
         <form method="post">
             {% csrf_token %}
-            
-            <!-- Ajout de chaque champ du formulaire avec un label -->
-            <div>
-                <label for="{{ form.nom.id_for_label }}">Nom :</label>
-                {{ form.nom }}
-            </div>
-            <div>
-                <label for="{{ form.prenom.id_for_label }}">Prénom :</label>
-                {{ form.prenom }}
-            </div>
-            <div>
-                <label for="{{ form.telephone.id_for_label }}">Téléphone :</label>
-                {{ form.telephone }}
-            </div>
-            <div>
-                <label for="{{ form.email.id_for_label }}">Email :</label>
-                {{ form.email }}
-            </div>
-            <div>
-                <label for="{{ form.type_utilisateur.id_for_label }}">Type d'utilisateur :</label>
-                {{ form.type_utilisateur }}
-            </div>
-            
+            <!--
+            On pourrait juste utiliser {{form}}
+            mais on le fait à la main pour le personnaliser
+            (en particulier pour les erreurs)
+
+            On itère donc sur chaque champ du formulaire en affichant son label
+            et un champ de saisie
+            Et si il y a des erreurs, on les affiche en tant que liste
+            juste en dessous du champ.
+            Les détails sur le formulaire sont dans le fichier forms.py -> class UtilisateurForm
+            -->
+            {% for field in form %}
+                <div>
+                    {% if field.errors %}
+                    <ul style="color: red;">
+                        {% for error in field.errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                    <label for="{{ field.id_for_label }}">{{ field.label }} :</label>
+                    {{ field }}
+                </div>
+            {% endfor %}
             <!-- Bouton de soumission -->
             <button type="submit">Soumettre</button>
         </form>

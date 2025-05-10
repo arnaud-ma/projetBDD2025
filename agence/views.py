@@ -1,12 +1,15 @@
+from django.contrib import messages  # <- Ajouté
 from django.http import HttpResponse
 from django.shortcuts import render
-from django.contrib import messages  # <- Ajouté
 
 from agence.forms import UtilisateurForm
+
 from .models import Acheteur, Utilisateur, Vendeur
+
 
 def index(request):
     return render(request, "agence/index.html")
+
 
 def list_users(request):
     user_list = Utilisateur.objects.all()
@@ -14,6 +17,7 @@ def list_users(request):
         "user_list": user_list,
     }
     return render(request, "agence/list_users.html", context)
+
 
 def create_user(request):
     if request.method == "POST":

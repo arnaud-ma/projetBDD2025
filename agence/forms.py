@@ -12,8 +12,13 @@ class UtilisateurForm(forms.ModelForm):
         choices=[("1", "Acheteur"), ("2", "Vendeur")],
         label="Type d'utilisateur",
     )
+
     class Meta:
         model = models.Utilisateur
-        fields: ClassVar = ["nom", "prenom", "email", "telephone","type_utilisateur"]
-
-    
+        fields: ClassVar = ["nom", "prenom", "email", "telephone", "type_utilisateur"]
+        labels: ClassVar = {
+            "nom": "Nom",
+            "prenom": "Prénom",
+            "email": "Adresse e-mail",
+            "telephone": "Téléphone",
+        }
