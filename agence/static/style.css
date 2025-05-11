@@ -51,6 +51,10 @@ footer {
     width: 100%;
 }
 
+h1 {
+    color: #333;
+    text-align: center;
+}
 
 /* -------------------------------------------------------------------------- */
 /*                           Formulaire create_user                           */
@@ -65,11 +69,6 @@ footer {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-
-.form_create_user h1 {
-    color: #333;
-    text-align: center;
-}
 
 .form_create_user form {
     display: flex;
