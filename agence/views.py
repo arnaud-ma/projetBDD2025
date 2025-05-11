@@ -24,11 +24,13 @@ def list_users(request):
 
 def create_user_accueil(request):
     return render(
-        request, "agence/create_user.html", {"accueil": True, "user_forms": UTILISATEURS_FORMS}
+        request,
+        "agence/create_user.html",
+        {"accueil": True, "user_forms": UTILISATEURS_FORMS, "type_utilisateur": "utilisateur"},
     )
 
 
-def create_user(request, type_utilisateur: str):
+def create_user(request, type_utilisateur: str = "utilisateur"):
     # UTILISATEURS_FORMS est une sorte de dictionnaire:
     # { "acheteur": AcheteurForm, "vendeur": VendeurForm, ... }
     # type_utilisateur est la clé, e.g. "acheteur"

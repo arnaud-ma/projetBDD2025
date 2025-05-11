@@ -1,0 +1,152 @@
+/* -------------------------------------------------------------------------- */
+/*                                    Base                                    */
+/* -------------------------------------------------------------------------- */
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+}
+
+header {
+    background-color: #333;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0;
+}
+
+nav {
+    background-color: #444;
+    padding: 10px;
+    text-align: center;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    margin: 0 15px;
+    font-weight: bold;
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
+
+main {
+    padding: 20px;
+}
+
+footer {
+    text-align: center;
+    padding: 10px;
+    background-color: #333;
+    color: white;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+
+/* -------------------------------------------------------------------------- */
+/*                           Formulaire create_user                           */
+/* -------------------------------------------------------------------------- */
+
+.form_create_user .container {
+    width: 50%;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+
+.form_create_user h1 {
+    color: #333;
+    text-align: center;
+}
+
+.form_create_user form {
+    display: flex;
+    flex-direction: column;
+}
+
+.form_create_user label {
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+.form_create_user input,
+.form_create_user select,
+.form_create_user button {
+    padding: 10px;
+    font-size: 14px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.form_create_user button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.form_create_user button:hover {
+    background-color: #45a049;
+}
+
+
+.form_create_user .container > ul {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.form_create_user .container > ul li {
+    margin: 0;
+}
+
+.form_create_user .container > ul li a {
+    display: inline-block;
+    background-color: #4CAF50; /* même couleur que le bouton */
+    color: white;
+    padding: 10px 15px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+}
+
+.form_create_user .container > ul li a:hover {
+    background-color: #45a049;
+}
+
+
+/* -------------------------------------------------------------------------- */
+/*                                 list_users                                 */
+/* -------------------------------------------------------------------------- */
+
+.list_users table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.list_users th,
+.list_users td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.list_users th {
+    background-color: #f4f4f4;
+}

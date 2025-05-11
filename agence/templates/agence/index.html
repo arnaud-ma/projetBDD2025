@@ -1,70 +1,16 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Accueil - Gestion des Utilisateurs</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f9f9f9;
-        }
-        header {
-            background-color: #333;
-            color: white;
-            padding: 10px 20px;
-            text-align: center;
-        }
-        header h1 {
-            margin: 0;
-        }
-        nav {
-            background-color: #444;
-            padding: 10px;
-            text-align: center;
-        }
-        nav a {
-            color: white;
-            text-decoration: none;
-            margin: 0 15px;
-            font-weight: bold;
-        }
-        nav a:hover {
-            text-decoration: underline;
-        }
-        main {
-            padding: 20px;
-        }
-        footer {
-            text-align: center;
-            padding: 10px;
-            background-color: #333;
-            color: white;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-        }
-    </style>
-</head>
-<body>
-    <header>
-        <h1>Bienvenue sur l'Application de Gestion des Utilisateurs</h1>
-    </header>
+{% extends "agence/base.html" %}
+{% block title %}Gestion des utilisateurs{% endblock %}
+{% block content %}
+<header>
+    <h1>Bienvenue sur l'Application de Gestion des Utilisateurs</h1>
+</header>
 
-    <nav>
-        <a href="create_user">Créer un utilisateur</a>
-        <a href="list_users">Liste des utilisateurs</a>
-    </nav>
+<main>
+    <h2>Bienvenue dans votre tableau de bord</h2>
+    <p>Cliquez  ci-dessus sur Créer un utilisateur ou Liste des utilisateurs selon vos bésoins! </p>
+</main>
 
-    <main>
-        <h2>Bienvenue dans votre tableau de bord</h2>
-        <p>Cliquez  ci-dessus sur Créer un utilisateur ou Liste des utilisateurs selon vos bésoins! </p>
-    </main>
-
-    <footer>
-        <p>&copy; 2025 Gestion des Utilisateurs</p>
-    </footer>
-</body>
-</html>
+<footer>
+    <p>&copy; 2025 Gestion des Utilisateurs</p>
+</footer>
+{% endblock %}

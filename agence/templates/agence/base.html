@@ -1,0 +1,23 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %} Gestion des utilisateurs {% endblock %}</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <nav>
+        <a href="/agence/"> Accueil </a>
+        <a href="/agence/create_user">Créer un utilisateur</a>
+        <a href="/agence/list_users">Liste des utilisateurs</a>
+    </nav>
+
+    {% block content %}  {% endblock content %}
+
+    <footer>
+        <p>&copy; 2025 Gestion des Utilisateurs</p>
+    </footer>
+</body>
+</html>

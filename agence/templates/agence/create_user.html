@@ -1,100 +1,54 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Créer un utilisateur</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f7f7f7;
-            margin: 0;
-            padding: 20px;
-        }
-        h1 {
-            color: #333;
-            text-align: center;
-        }
-        .container {
-            width: 50%;
-            margin: 0 auto;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        form {
-            display: flex;
-            flex-direction: column;
-        }
-        label {
-            font-size: 16px;
-            margin-bottom: 8px;
-        }
-        input, select, button {
-            padding: 10px;
-            font-size: 14px;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-    </style>
-</head>
-<body>
-    <h1>Création d'un {{ type_utilisateur | capfirst }}</h1>
-    <div class="container">
+{% extends "agence/base.html" %}
+{% block title %}
+    Création des {{ type_utilisateur }}s
+{% endblock %}
 
-        {% if accueil %}
-            <h2> Choix de l'utilisateur </h2>
-            <p>Vous devez choisir le type d'utilisateur que vous souhaitez créer.</p>
-            <ul>
-                {{ user_forms }}
-                {% for user in user_forms.keys %}
-                    <li><a href="{% url 'create_user' user %}">{{ user | capfirst}}</a></li>
-                {% endfor %}
-            </ul>
-        {% else %}
-        {% if messages %}
-            <ul>
-                {% for message in messages %}
-                    <!-- On peut utiliser le niveau du message pour changer la couleur -->
-                     <li style="color: {% if message.tags == 'error' %}red{% elif message.tags == 'success' %}green{% else %}black{% endif %};">
-                        {{ message }}
-                    </li>
-                {% endfor %}
-            </ul>
-        {% endif %}
+{% block content %}
 
-        <form method="post">
-            {% csrf_token %}
-            <!--
-            On pourrait juste utiliser {{form}}
-            mais on le fait à la main pour le personnaliser
-            (en particulier pour les erreurs)
+<div class="form_create_user">
+<h1>Création d'un {{ type_utilisateur }}</h1>
+<div class="container">
+    {% if accueil %}
+        <h2> Choix de l'utilisateur </h2>
+        <p>Choisissez le type d'utilisateur que vous souhaitez créer.</p>
+        <ul>
+            {% for user in user_forms.keys %}
+                <li><a href="{% url 'create_user' user %}">{{ user | capfirst}}</a></li>
+            {% endfor %}
+        </ul>
+    {% else %}
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <!-- On peut utiliser le niveau du message pour changer la couleur -->
+                 <li style="color: {% if message.tags == 'error' %}red{% elif message.tags == 'success' %}green{% else %}black{% endif %};">
+                    {{ message }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 
-            On itère donc sur chaque champ du formulaire en affichant son label
-            et un champ de saisie
-            Et si il y a des erreurs, on les affiche en tant que liste
-            juste en dessous du champ.
-            Les détails sur le formulaire sont dans le fichier forms.py
-            -->
-            <h2> Infos générales </h2>
-            {% include "agence/_form_fields.html" with form=form_utilisateur %}
-            {% include "agence/_form_fields.html" with form=form_utilisateur_spec %}
-            <!-- Bouton de soumission -->
-            <button type="submit">Soumettre</button>
-        </form>
-        {% endif %}
+    <form method="post">
+        {% csrf_token %}
+        <!--
+        On pourrait juste utiliser {{form}}
+        mais on le fait à la main pour le personnaliser
+        (en particulier pour les erreurs)
 
-    </div>
-</body>
-</html>
+        On itère donc sur chaque champ du formulaire en affichant son label
+        et un champ de saisie
+        Et si il y a des erreurs, on les affiche en tant que liste
+        juste en dessous du champ.
+        Les détails sur le formulaire sont dans le fichier forms.py
+        -->
+        <h2> Infos générales </h2>
+        {% include "agence/_form_fields.html" with form=form_utilisateur %}
+        {% include "agence/_form_fields.html" with form=form_utilisateur_spec %}
+        <!-- Bouton de soumission -->
+        <button type="submit">Soumettre</button>
+    </form>
+    {% endif %}
+</div>
+</div>
+
+{% endblock content %}
