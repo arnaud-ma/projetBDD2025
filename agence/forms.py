@@ -1,24 +1,64 @@
 from typing import ClassVar
 
+from bidict import bidict
 from django import forms
 from phonenumber_field.modelfields import PhoneNumberField
 
 from . import models
 
+UTILISATEURS_FORMS: bidict[str, type[forms.ModelForm]] = bidict()
+
+
+def enregistrer_utilisateur_form(model_name: str):
+    """
+    Décorateur pour enregistrer les formulaires d'utilisateur
+    Le décorateur prend le nom du modèle d'utilisateur comme argument et
+    enregistre le formulaire associé dans le dictionnaire UTILISATEURS_FORMS.
+    Cela permet de lier facilement les formulaires à leurs labels
+    """
+
+    def decorator(form_class: type[forms.ModelForm]):
+        UTILISATEURS_FORMS[model_name.lower()] = form_class
+        return form_class
+
+    return decorator
+
 
 class UtilisateurForm(forms.ModelForm):
-    type_utilisateur = forms.ChoiceField(
-        widget=forms.Select,
-        choices=[("1", "Acheteur"), ("2", "Vendeur")],
-        label="Type d'utilisateur",
-    )
-
     class Meta:
         model = models.Utilisateur
-        fields: ClassVar = ["nom", "prenom", "email", "telephone", "type_utilisateur"]
+        fields: ClassVar = [
+            "nom",
+            "prenom",
+            "email",
+            "telephone",
+        ]
+
+
+@enregistrer_utilisateur_form("Acheteur")
+class AcheteurForm(forms.ModelForm):
+    class Meta:
+        model = models.Acheteur
+        # TODO: critere_recherche
+        fields: ClassVar = []
+        # fields: ClassVar = ["critere_recherche"]
+        # labels: ClassVar = {
+        #     "critere_recherche": "Critères de recherche",
+        # }
+
+
+@enregistrer_utilisateur_form("Vendeur")
+class VendeurForm(forms.ModelForm):
+    class Meta:
+        model = models.Vendeur
+        fields: ClassVar = []
+
+
+@enregistrer_utilisateur_form("Agent")
+class AgentForm(forms.ModelForm):
+    class Meta:
+        model = models.Agent
+        fields: ClassVar = ["agence"]
         labels: ClassVar = {
-            "nom": "Nom",
-            "prenom": "Prénom",
-            "email": "Adresse e-mail",
-            "telephone": "Téléphone",
+            "agence": "Agence",
         }

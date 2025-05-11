@@ -50,8 +50,19 @@
     </style>
 </head>
 <body>
-    <h1>Création d'un utilisateur</h1>
+    <h1>Création d'un {{ type_utilisateur | capfirst }}</h1>
     <div class="container">
+
+        {% if accueil %}
+            <h2> Choix de l'utilisateur </h2>
+            <p>Vous devez choisir le type d'utilisateur que vous souhaitez créer.</p>
+            <ul>
+                {{ user_forms }}
+                {% for user in user_forms.keys %}
+                    <li><a href="{% url 'create_user' user %}">{{ user | capfirst}}</a></li>
+                {% endfor %}
+            </ul>
+        {% else %}
         {% if messages %}
             <ul>
                 {% for message in messages %}
@@ -74,24 +85,16 @@
             et un champ de saisie
             Et si il y a des erreurs, on les affiche en tant que liste
             juste en dessous du champ.
-            Les détails sur le formulaire sont dans le fichier forms.py -> class UtilisateurForm
+            Les détails sur le formulaire sont dans le fichier forms.py
             -->
-            {% for field in form %}
-                <div>
-                    {% if field.errors %}
-                    <ul style="color: red;">
-                        {% for error in field.errors %}
-                        <li>{{ error }}</li>
-                        {% endfor %}
-                    </ul>
-                    {% endif %}
-                    <label for="{{ field.id_for_label }}">{{ field.label }} :</label>
-                    {{ field }}
-                </div>
-            {% endfor %}
+            <h2> Infos générales </h2>
+            {% include "agence/_form_fields.html" with form=form_utilisateur %}
+            {% include "agence/_form_fields.html" with form=form_utilisateur_spec %}
             <!-- Bouton de soumission -->
             <button type="submit">Soumettre</button>
         </form>
+        {% endif %}
+
     </div>
 </body>
 </html>

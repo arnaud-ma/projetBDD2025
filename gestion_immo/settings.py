@@ -17,7 +17,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Graph_model settings
 GRAPH_MODELS = {
-    "all_applications": True,
+    "app_labels": ["agence"],
+    "all_applications": False,
     "group_models": True,
 }
 

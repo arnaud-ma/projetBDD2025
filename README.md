@@ -46,6 +46,7 @@
 - [X] Formulaire pour créer un utilisateur
 - [ ] Script pour peupler la base de données aléatoirement.
 - [ ] formulaire pour créer une nouvelle agence (**Arnaud**)
+- [ ] Adoucir la contrainte unique sur le numéro de téléphone pour inclure le null (**Arnaud**)
 - [ ] ajouter création d'un agent dans formulaire pour créer utilsisateur (**Arnaud**)
 - [ ] Ne plus avoir d'erreur quand un utilisateur déjà vendeur veut s'inscrire en tant qu'acheteur (**Prosper**)
 - [ ] Critère de recherche pour les acheteurs (**Prosper**)

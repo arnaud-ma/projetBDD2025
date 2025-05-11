@@ -1,5 +1,3 @@
-from typing import ClassVar
-
 from django.db import models
 from django.forms import CharField
 from phonenumber_field.modelfields import PhoneNumberField
@@ -80,19 +78,21 @@ class Bien(models.Model):
 #                              region Utilisateur                              #
 # ---------------------------------------------------------------------------- #
 
+# L'idée est d'avoir une table commune Utilisateur
+# et ensuite un utilisateur peut être un Acheteur, un Vendeur, etc...
+# donc l'identifiant de l'utilisateur est la clé primaire de la table Utilisateur
+# et c'est en même temps une clé primaire et étrangère "one-to-one" dans les "sous-tables".
+
+# Pour simplifier la gestion des utilisateurs, on utilise un proxy
+# cad une classe parente dont les sous-tables héritent
+# et qui se charge de tout ce qui est commun à tous les utilisateurs
+
 
 class Utilisateur(models.Model):
     nom = models.CharField(max_length=255)
     prenom = models.CharField(max_length=255)
     telephone = PhoneNumberField(blank=True, unique=True, default=None)
     email = models.EmailField(unique=True)
-
-    TYPE_CHOICES: ClassVar = [
-        ("1", "Acheteur"),
-        ("2", "Vendeur"),
-    ]
-
-    type_utilisateur = models.CharField(max_length=1, choices=TYPE_CHOICES, default="1")
 
     def __str__(self):
         coords = (self.email, self.telephone)  # récupérer les coordonnées
@@ -105,15 +105,31 @@ class Utilisateur(models.Model):
         return f"{self.prenom} {self.nom} {coords_str}"
 
 
-class Vendeur(Utilisateur):
+class ProxyUtilisateur:
+    """Classe proxy pour Utilisateur."""
+
+    def __str__(self):
+        coords = (self.utilisateur.email, self.utilisateur.telephone)  # récupérer les coordonnées
+        coords = filter(None, coords)  # filtrer les coordonnées vides
+        coords_str = ", ".join(map(str, coords))  # convertir en chaîne
+        if coords_str:
+            # s'il existe au moins une coordonnée, ajouter des parenthèses
+            coords_str = f"({coords_str})"
+
+        return f"{self.utilisateur.prenom} {self.utilisateur.nom} {coords_str}"
+
+
+class Vendeur(ProxyUtilisateur, models.Model):
+    utilisateur = models.OneToOneField(Utilisateur, models.CASCADE, primary_key=True)
     pass
 
 
-class Acheteur(Utilisateur):
+class Acheteur(ProxyUtilisateur, models.Model):
+    utilisateur = models.OneToOneField(Utilisateur, models.CASCADE, primary_key=True)
     critere_recherche = models.ForeignKey(InfosBien, models.CASCADE, null=True)
 
 
-class Agent(Utilisateur):
+class Agent(ProxyUtilisateur, models.Model):
     agence = models.ForeignKey(Agence, models.CASCADE)
 
     def __str__(self):
