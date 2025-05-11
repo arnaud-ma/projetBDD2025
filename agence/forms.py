@@ -2,7 +2,8 @@ from typing import ClassVar
 
 from bidict import bidict
 from django import forms
-from phonenumber_field.modelfields import PhoneNumberField
+from phonenumber_field.formfields import PhoneNumberField
+from phonenumber_field.widgets import RegionalPhoneNumberWidget
 
 from . import models
 
@@ -25,6 +26,7 @@ def enregistrer_utilisateur_form(model_name: str):
 
 
 class UtilisateurForm(forms.ModelForm):
+    telephone = PhoneNumberField(required=False, widget=RegionalPhoneNumberWidget())
     class Meta:
         model = models.Utilisateur
         fields: ClassVar = [
@@ -33,6 +35,10 @@ class UtilisateurForm(forms.ModelForm):
             "email",
             "telephone",
         ]
+
+    def clean_telephone(self):
+        # Si le tel est Falsy, on renvoit None pour déclencher NULL dans la BDD
+        return self.cleaned_data.get("telephone") or None
 
 
 @enregistrer_utilisateur_form("Acheteur")
