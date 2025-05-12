@@ -1,0 +1,19 @@
+{% if messages %}
+<ul>
+  {% for message in messages %}
+    <!-- On peut utiliser le niveau du message pour changer la couleur -->
+    <li style="color:
+    {% if message.tags == 'error' %}
+         red
+
+      {% elif message.tags == 'success' %}
+         green
+
+      {% else %}
+         black
+
+      {% endif %}
+    ;">{{ message }}</li>
+  {% endfor %}
+</ul>
+{% endif %}

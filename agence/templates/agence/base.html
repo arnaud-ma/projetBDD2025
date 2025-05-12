@@ -6,11 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %} Gestion des utilisateurs {% endblock %}</title>
     <link rel="stylesheet" href="/static/style.css">
+    {% block extra_js %} {% endblock extra_js %}
 </head>
 <body>
     <nav>
         <a href="/agence/"> Accueil </a>
         <a href="/agence/create_user">Créer un utilisateur</a>
+        <a href="/agence/create_agence">Créer une agence</a>
         <a href="/agence/list_users">Liste des utilisateurs</a>
     </nav>
 
@@ -18,6 +20,7 @@
 
     <footer>
         <p>&copy; 2025 Gestion des Utilisateurs</p>
+        {% block extra_footer %} {% endblock extra_footer %}
     </footer>
 </body>
 </html>

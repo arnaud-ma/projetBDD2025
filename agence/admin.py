@@ -2,17 +2,19 @@ from django.contrib import admin
 
 from .models import (
     Acheteur,
+    Adresse,
     Agence,
     Agent,
     Avis,
     Bien,
+    Commune,
     FaitAchat,
     InfosBien,
-    Lieu,
     Message,
     RendezVous,
     Utilisateur,
     Vendeur,
+    Voie,
 )
 
 # Register your models here.
@@ -21,7 +23,6 @@ admin.site.register([
     Acheteur,
     Vendeur,
     Agent,
-    Lieu,
     Agence,
     InfosBien,
     Bien,
@@ -29,4 +30,7 @@ admin.site.register([
     RendezVous,
     Avis,
     Message,
+    Adresse,
+    Commune,
+    Voie,
 ])

@@ -17,6 +17,7 @@ header {
 }
 
 header h1 {
+    color: white;
     margin: 0;
 }
 
@@ -57,10 +58,11 @@ h1 {
 }
 
 /* -------------------------------------------------------------------------- */
-/*                           Formulaire create_user                           */
+/*                                 Formulaire                                 */
 /* -------------------------------------------------------------------------- */
 
-.form_create_user .container {
+
+.formulaire .container {
     width: 50%;
     margin: 0 auto;
     background-color: #fff;
@@ -70,19 +72,19 @@ h1 {
 }
 
 
-.form_create_user form {
+.formulaire form {
     display: flex;
     flex-direction: column;
 }
 
-.form_create_user label {
+.formulaire label {
     font-size: 16px;
     margin-bottom: 8px;
 }
 
-.form_create_user input,
-.form_create_user select,
-.form_create_user button {
+.formulaire input,
+.formulaire select,
+.formulaire button {
     padding: 10px;
     font-size: 14px;
     margin-bottom: 15px;
@@ -90,19 +92,19 @@ h1 {
     border-radius: 4px;
 }
 
-.form_create_user button {
+.formulaire button {
     background-color: #4CAF50;
     color: white;
     border: none;
     cursor: pointer;
 }
 
-.form_create_user button:hover {
+.formulaire button:hover {
     background-color: #45a049;
 }
 
 
-.form_create_user .container > ul {
+.formulaire .container>ul {
     list-style: none;
     padding: 0;
     margin: 20px 0;
@@ -111,13 +113,14 @@ h1 {
     gap: 15px;
 }
 
-.form_create_user .container > ul li {
+.formulaire .container>ul li {
     margin: 0;
 }
 
-.form_create_user .container > ul li a {
+.formulaire .container>ul li a {
     display: inline-block;
-    background-color: #4CAF50; /* même couleur que le bouton */
+    background-color: #4CAF50;
+    /* même couleur que le bouton */
     color: white;
     padding: 10px 15px;
     border-radius: 4px;
@@ -126,7 +129,7 @@ h1 {
     transition: background-color 0.2s ease;
 }
 
-.form_create_user .container > ul li a:hover {
+.formulaire .container>ul li a:hover {
     background-color: #45a049;
 }
 

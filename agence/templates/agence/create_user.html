@@ -1,36 +1,28 @@
-{% extends "agence/base.html" %}
+{% extends 'agence/base.html' %}
 {% block title %}
-    Création des {{ type_utilisateur }}s
+  Création des {{ type_utilisateur }}s
 {% endblock %}
 
 {% block content %}
-
-<div class="form_create_user">
-<h1>Création d'un {{ type_utilisateur }}</h1>
-<div class="container">
-    {% if accueil %}
-        <h2> Choix de l'utilisateur </h2>
+  <div class="formulaire">
+    <h1>Création d'un {{ type_utilisateur }}</h1>
+    <div class="container">
+      {% if accueil %}
+        <h2>Choix de l'utilisateur</h2>
         <p>Choisissez le type d'utilisateur que vous souhaitez créer.</p>
         <ul>
-            {% for user in user_forms.keys %}
-                <li><a href="{% url 'create_user' user %}">{{ user | capfirst}}</a></li>
-            {% endfor %}
+          {% for user in user_forms.keys %}
+            <li>
+              <a href="{% url 'create_user' user %}">{{ user|capfirst }}</a>
+            </li>
+          {% endfor %}
         </ul>
-    {% else %}
-    {% if messages %}
-        <ul>
-            {% for message in messages %}
-                <!-- On peut utiliser le niveau du message pour changer la couleur -->
-                 <li style="color: {% if message.tags == 'error' %}red{% elif message.tags == 'success' %}green{% else %}black{% endif %};">
-                    {{ message }}
-                </li>
-            {% endfor %}
-        </ul>
-    {% endif %}
+      {% else %}
+        {% include 'agence/_messages.html' with messages=messages %}
 
-    <form method="post">
-        {% csrf_token %}
-        <!--
+        <form method="post">
+          {% csrf_token %}
+          <!--
         On pourrait juste utiliser {{form}}
         mais on le fait à la main pour le personnaliser
         (en particulier pour les erreurs)
@@ -40,15 +32,13 @@
         Et si il y a des erreurs, on les affiche en tant que liste
         juste en dessous du champ.
         Les détails sur le formulaire sont dans le fichier forms.py
-        -->
-        <h2> Infos générales </h2>
-        {% include "agence/_form_fields.html" with form=form_utilisateur %}
-        {% include "agence/_form_fields.html" with form=form_utilisateur_spec %}
-        <!-- Bouton de soumission -->
-        <button type="submit">Soumettre</button>
-    </form>
-    {% endif %}
-</div>
-</div>
-
-{% endblock content %}
+            -->
+          {% include "agence/_form_fields.html" with form=form_utilisateur %}
+          {% include "agence/_form_fields.html" with form=form_utilisateur_spec %}
+          <!-- Bouton de soumission -->
+          <button type="submit">Soumettre</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

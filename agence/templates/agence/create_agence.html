@@ -1,0 +1,47 @@
+{% extends 'agence/base.html' %}
+{% load static %}
+{% block title %}
+  Création d'une agence
+{% endblock %}
+
+{% block content %}
+  <div class="formulaire">
+    <h1>Création d'une agence</h1>
+    <div class="container">
+      {% include "agence/_messages.html" with messages=messages %}
+
+      <form method="post">
+        {% csrf_token %}
+        {% include 'agence/_form_fields.html' with form=form_agence %}
+
+
+        {% comment %}
+        Pour une raison inconnue le bouton est surélevé par rapport aux autres formulaires
+        Sûrement à cause du widget autocomplete. On doit donc rajouter une couche de style ici
+        {% endcomment %}
+        <button type="submit" style="margin-top: 20px" >Soumettre</button>
+      </form>
+    </div>
+  </div>
+{% endblock %}
+
+{% comment %}Le reste est du code boilerplate qui soit être rajouté pour avoir l'autocompletion des adresses{% endcomment %}
+{% block extra_footer %}
+  <script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+  {{ form_agence.media }}
+
+  <script>
+    ;(function ($) {
+      $('#add-form').click(function () {
+        var index = $('#id_inline_test_models-TOTAL_FORMS').val()
+        var newTable = $('#id_inline_test_models-__prefix__-DELETE').parents('table').clone()
+        newTable.find(':input').each(function () {
+          for (attr of ['name', 'id']) $(this).attr(attr, $(this).attr(attr).replace('__prefix__', index))
+        })
+        newTable.insertBefore($(this))
+        $('#id_inline_test_models-TOTAL_FORMS').val(parseInt($('#id_inline_test_models-TOTAL_FORMS').val()) + 1)
+        newTable.slideDown()
+      })
+    })($)
+  </script>
+{% endblock %}

@@ -1,11 +1,16 @@
 from typing import ClassVar
 
 from bidict import bidict
+from dal import autocomplete
 from django import forms
 from phonenumber_field.formfields import PhoneNumberField
 from phonenumber_field.widgets import RegionalPhoneNumberWidget
 
 from . import models
+
+# ---------------------------------------------------------------------------- #
+#                                 Utilisateurs                                 #
+# ---------------------------------------------------------------------------- #
 
 UTILISATEURS_FORMS: bidict[str, type[forms.ModelForm]] = bidict()
 
@@ -67,4 +72,27 @@ class AgentForm(forms.ModelForm):
         fields: ClassVar = ["agence"]
         labels: ClassVar = {
             "agence": "Agence",
+        }
+
+
+# ---------------------------------------------------------------------------- #
+#                                    Agence                                    #
+# ---------------------------------------------------------------------------- #
+
+
+class AgenceForm(forms.ModelForm):
+
+    class Meta:
+        model = models.Agence
+        fields: ClassVar = ["nom", "telephone", "adresse"]
+        labels: ClassVar = {
+            "nom": "Nom",
+            "telephone": "Téléphone",
+            "adresse": "Adresse",
+        }
+        widgets: ClassVar = {
+            "adresse": autocomplete.ModelSelect2(
+                url="adresse-autocomplete",
+            ),
+            "telehone": RegionalPhoneNumberWidget(),
         }

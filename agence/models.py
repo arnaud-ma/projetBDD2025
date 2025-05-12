@@ -1,5 +1,4 @@
 from django.db import models
-from django.forms import CharField
 from phonenumber_field.modelfields import PhoneNumberField
 
 # Create your models here.
@@ -9,23 +8,57 @@ from phonenumber_field.modelfields import PhoneNumberField
 # ---------------------------------------------------------------------------- #
 
 
-class Lieu(models.Model):
-    longitude = models.FloatField()
-    latitude = models.FloatField()
-    adresse = models.CharField(max_length=255, blank=True, default="")
-    details = models.TextField(blank=True, default="")
-    code_commune = models.CharField(max_length=5)
+class Commune(models.Model):
+    code_insee = models.CharField(max_length=5, unique=True)
+    nom = models.CharField(max_length=255)
+    code_postal = models.CharField(max_length=5)
 
     def __str__(self):
-        return f"{self.adresse} ({self.code_commune}): {(self.latitude, self.longitude)})"
+        return f"{self.nom} ({self.code_postal})"
+
+
+class Voie(models.Model):
+    id_fantoir = models.CharField(max_length=10, unique=True)
+    nom = models.CharField(max_length=255)
+    commune = models.ForeignKey(Commune, models.PROTECT)
+
+    def __str__(self):
+        return f"{self.nom} - {self.commune}"
+
+
+class Adresse(models.Model):
+    voie = models.ForeignKey(Voie, models.PROTECT)
+    numero = models.CharField(max_length=10, blank=True)
+    complement = models.CharField(max_length=10, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+    latitude = models.FloatField(null=True, blank=True)
+    alias = models.CharField(max_length=255, blank=True)
+
+    def __str__(self):
+        num = f"{self.numero}{self.complement or ''}"
+        return f"{num} {self.voie}"
+
+    def save(self, *args, **kwargs):
+        self.text_recherche = "".join([
+            str(i or "")
+            for i in (
+                self.numero,
+                self.complement,
+                self.voie.nom,
+                self.voie.commune.nom,
+                self.voie.commune.code_postal,
+            )
+        ]).lower()
+        super().save(*args, **kwargs)
 
 
 class Agence(models.Model):
-    nom = CharField(max_length=255)
-    id_lieu = models.ForeignKey(Lieu, models.CASCADE)
+    nom = models.CharField(max_length=255)
+    adresse = models.ForeignKey(Adresse, models.PROTECT)
+    telephone = PhoneNumberField(null=True, blank=True, unique=True, default=None)
 
     def __str__(self):
-        return f"{self.nom} située à {self.id_lieu}"
+        return f"{self.nom} située à {self.adresse}"
 
 
 # endregion
@@ -42,7 +75,7 @@ class InfosBien(models.Model):
     nb_wc = models.IntegerField(null=True)
     surface_habitable = models.FloatField(null=True)
     surface_terrain = models.FloatField(null=True)
-    lieu = models.ForeignKey(Lieu, models.PROTECT, null=True)
+    lieu = models.ForeignKey(Adresse, models.PROTECT, null=True)
 
     def __str__(self):
         return (
@@ -170,7 +203,7 @@ class RendezVous(models.Model):
     objet = models.CharField(max_length=255)
     commentaire = models.TextField(blank=True, default="")
     date = models.DateTimeField()
-    lieu = models.ForeignKey(Lieu, models.PROTECT, null=True)
+    lieu = models.ForeignKey(Adresse, models.PROTECT, null=True)
 
     def __str__(self):
         return f"Rendez-vous pour {self.fait_achat} ({self.date})"

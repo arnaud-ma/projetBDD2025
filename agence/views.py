@@ -1,17 +1,24 @@
-from typing import Final
-
+import functools
+import operator
+from dal import autocomplete
 from django.contrib import messages  # <- Ajouté
 from django.core.exceptions import BadRequest
+from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render
 
-from agence.forms import UTILISATEURS_FORMS, UtilisateurForm
+from agence.forms import UTILISATEURS_FORMS, AgenceForm, UtilisateurForm
 
-from .models import Utilisateur
+from .models import Adresse, Agence, Utilisateur
 
 
 def index(request):
     return render(request, "agence/index.html")
+
+
+# ---------------------------------------------------------------------------- #
+#                                 Utilisateurs                                 #
+# ---------------------------------------------------------------------------- #
 
 
 def list_users(request):
@@ -68,7 +75,9 @@ def create_user(request, type_utilisateur: str = "utilisateur"):
             instance.utilisateur = utilisateur
             instance.save()
             messages.success(request, "✅ Utilisateur créé avec succès !")
-            return render(request, "agence/create_user.html", {"form": UtilisateurForm()})
+            return render(
+                request, "agence/create_user.html", {"form_utilisateur": UtilisateurForm()}
+            )
         else:
             messages.error(request, "⚠️ Veuillez corriger les erreurs ci-dessous.")
     else:
@@ -85,3 +94,73 @@ def create_user(request, type_utilisateur: str = "utilisateur"):
             "accueil": False,
         },
     )
+
+# ---------------------------------------------------------------------------- #
+#                                    Agence                                    #
+# ---------------------------------------------------------------------------- #
+
+
+def create_agence(request):
+    if request.method == "POST":
+        form = AgenceForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "✅ Agence créée avec succès !")
+            return render(request, "agence/create_user.html", {"form_agence": AgenceForm()})
+        else:
+            messages.error(request, "⚠️ Veuillez corriger les erreurs ci-dessous.")
+    else:
+        form = AgenceForm()
+    return render(
+        request,
+        "agence/create_agence.html",
+        {
+            "form_agence": form,
+        },
+    )
+
+
+# ---------------------------------------------------------------------------- #
+#                                   Adresses                                   #
+# ---------------------------------------------------------------------------- #
+
+
+class AdresseAutocomplete(autocomplete.Select2QuerySetView):
+    """Classe pour l'autocomplétion des adresses."""
+
+    paginate_by = 10  # Limite le nombre de résultats par page
+
+    def get_queryset(self):
+        # Pour la sécurité, seulement le formulaire est autorisé
+        # à faire des requêtes sur la base de données
+        # if not self.request.user.is_authenticated:
+        #     return Adresse.objects.none()
+        if not self.q:
+            # Si rien n'est tapé, on retourne rien (pour éviter de faire une
+            # requête trop lourde)
+            return Adresse.objects.none()
+
+        # TODO: la requête devient extrêmement longue lorsque le nombre d'adresses
+        # est grand (1 million ça passe mais 22 millions pour la France entière
+        # c'est beaucoup trop long)
+        mots = self.q.strip().split(" ")
+        filtres = Q()
+        for mot in filter(None, mots):
+            filtres &= (
+                Q(numero__istartswith=mot)
+                | Q(complement__istartswith=mot)
+                | Q(voie__nom__icontains=mot)
+                | Q(voie__commune__nom__istartswith=mot)
+                | Q(voie__commune__code_postal__istartswith=mot)
+            )
+
+        qs = Adresse.objects.filter(filtres)
+
+        return qs[: self.paginate_by]  # Limite le nombre de résultats par page
+
+    def get_result_label(self, result):  # noqa: PLR6301
+        """Fonction pour afficher le résultat de l'autocomplétion."""
+        return (
+            f"{result.numero} {result.complement} {result.voie.nom}, {result.voie.commune.nom} "
+            f"({result.voie.commune.code_postal})"
+        )
