@@ -13,7 +13,7 @@
             <th>Prénom</th>
             <th>Email</th>
             <th>Téléphone</th>
-            <th>Type d'utilisateur</th>
+            <th>Type(s) d'utilisateur</th>
         </tr>
     </thead>
     <tbody>
@@ -24,7 +24,7 @@
                 <td>{{ user.prenom }}</td>
                 <td>{{ user.email }}</td>
                 <td>{{ user.telephone }}</td>
-                <td>{{ user.get_type_utilisateur_display }}</td>
+                <td>{{ user.types }}</td>
             </tr>
         {% empty %}
             <tr>

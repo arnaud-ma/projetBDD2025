@@ -1,7 +1,10 @@
+from typing import NamedTuple
+
 import requests
 from dal import autocomplete
 from django.contrib import messages  # <- Ajouté
 from django.core.exceptions import BadRequest
+from django.db import connection
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -19,11 +22,59 @@ def index(request):
 #                                 Utilisateurs                                 #
 # ---------------------------------------------------------------------------- #
 
+class UserInfo(NamedTuple):
+    id: int
+    email: str
+    telephone: str
+    nom: str
+    prenom: str
+    types: str
+
+
+def get_user_list():
+    # Le but est d'avoir exactement la même table qui est retournée dans agence/list_users/
+    # 1. On rajoute une nouvelle colonne "type_" qui vaut tout le temps "acheteur" dans
+    #   la table acheteur, "vendeur" dans la table vendeur, etc.
+    # 2. On fait un UNION ALL de ces tables en prenant seulement
+    #   l'id utilisateur et la colonne créée
+    # 3. On fait un group by sur l'id utilisateur, puis une aggrégation pour
+    #    sur ces groupes qui fait l'équivalent de ",".join(type_).
+
+    # ! ça fonctionne puisqu'on est sur sqlite, sur d'autre sgbd le ",".join()
+    # peut avoir un autre nom complètement différent:
+
+    # sqlite, mysql           -> GROUP_CONCAT
+    # Oracle                  -> LISTAGG
+    # SQL Server, PostrgreSQL -> STRING_AGG
+    query = """
+        SELECT
+            utilisateur_id,
+            email,
+            telephone,
+            nom,
+            prenom,
+            GROUP_CONCAT(type_ ORDER BY type_) AS types
+        FROM
+            agence_utilisateur
+        JOIN
+            (
+                SELECT utilisateur_id, 'acheteur' AS type_ FROM agence_acheteur
+                UNION ALL
+                SELECT utilisateur_id, 'vendeur' AS type_ FROM agence_vendeur
+            ) AS types_combined
+            ON agence_utilisateur.id = types_combined.utilisateur_id
+        GROUP BY
+            utilisateur_id, email;
+    """
+    with connection.cursor() as cursor:
+        cursor.execute(query)
+        result = cursor.fetchall()
+    return [UserInfo(*ligne) for ligne in result]
+
 
 def list_users(request):
-    user_list = Utilisateur.objects.all()
     context = {
-        "user_list": user_list,
+        "user_list": get_user_list(),
     }
     return render(request, "agence/list_users.html", context)
 
@@ -157,44 +208,3 @@ class AdresseAutocomplete(autocomplete.Select2ListView):
     # pas self.q. On ne veut pas ça ici.
     def autocomplete_results(self, results):  # noqa: PLR6301
         return results
-
-
-# class AdresseAutocomplete(autocomplete.Select2QuerySetView):
-#     """Classe pour l'autocomplétion des adresses."""
-
-#     paginate_by = 10  # Limite le nombre de résultats par page
-
-#     def get_queryset(self):
-#         # Pour la sécurité, seulement le formulaire est autorisé
-#         # à faire des requêtes sur la base de données
-#         # if not self.request.user.is_authenticated:
-#         #     return Adresse.objects.none()
-#         if not self.q:
-#             # Si rien n'est tapé, on retourne rien (pour éviter de faire une
-#             # requête trop lourde)
-#             return Adresse.objects.none()
-
-#         # # TODO: la requête devient extrêmement longue lorsque le nombre d'adresses
-#         # # est grand (1 million ça passe mais 22 millions pour la France entière
-#         # # c'est beaucoup trop long)
-#         # mots = self.q.strip().split(" ")
-#         # filtres = Q()
-#         # for mot in filter(None, mots):
-#         #     filtres &= (
-#         #         Q(numero__istartswith=mot)
-#         #         | Q(complement__istartswith=mot)
-#         #         | Q(voie__nom__icontains=mot)
-#         #         | Q(voie__commune__nom__istartswith=mot)
-#         #         | Q(voie__commune__code_postal__istartswith=mot)
-#         #     )
-
-#         # qs = Adresse.objects.filter(filtres)
-
-#         return qs[: self.paginate_by]  # Limite le nombre de résultats par page
-
-#     def get_result_label(self, result):
-#         """Fonction pour afficher le résultat de l'autocomplétion."""
-#         return (
-#             f"{result.numero} {result.complement} {result.voie.nom}, {result.voie.commune.nom} "
-#             f"({result.voie.commune.code_postal})"
-#         )
