@@ -1,5 +1,6 @@
 from typing import ClassVar
 
+import requests
 from bidict import bidict
 from dal import autocomplete
 from django import forms
@@ -81,18 +82,24 @@ class AgentForm(forms.ModelForm):
 
 
 class AgenceForm(forms.ModelForm):
-
+    adresse = forms.CharField(
+        label="Adresse", widget=autocomplete.ListSelect2(url="adresse-autocomplete")
+    )
     class Meta:
         model = models.Agence
         fields: ClassVar = ["nom", "telephone", "adresse"]
         labels: ClassVar = {
             "nom": "Nom",
             "telephone": "Téléphone",
-            "adresse": "Adresse",
         }
         widgets: ClassVar = {
-            "adresse": autocomplete.ModelSelect2(
-                url="adresse-autocomplete",
-            ),
-            "telehone": RegionalPhoneNumberWidget(),
+            "telephone": RegionalPhoneNumberWidget(),
         }
+
+    def clean_adresse(self):
+        texte = self.cleaned_data["adresse"]
+        try:
+            adresse = models.Adresse.from_texte(texte)
+        except ValueError as e:
+            raise forms.ValidationError(str(e)) from e
+        return adresse

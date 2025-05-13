@@ -14,6 +14,7 @@ dependencies = [
     "phonenumbers>=9.0.3",
     "pydot>=3.0.4",
     "pyparsing>=3.2.3",
+    "requests>=2.32.3",
     "sqlalchemy>=2.0.40",
     "tqdm>=4.67.1",
 ]

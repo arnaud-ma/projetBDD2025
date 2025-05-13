@@ -1,5 +1,4 @@
-import functools
-import operator
+import requests
 from dal import autocomplete
 from django.contrib import messages  # <- Ajouté
 from django.core.exceptions import BadRequest
@@ -124,43 +123,78 @@ def create_agence(request):
 #                                   Adresses                                   #
 # ---------------------------------------------------------------------------- #
 
-
-class AdresseAutocomplete(autocomplete.Select2QuerySetView):
+class AdresseAutocomplete(autocomplete.Select2ListView):
     """Classe pour l'autocomplétion des adresses."""
 
-    paginate_by = 10  # Limite le nombre de résultats par page
-
-    def get_queryset(self):
-        # Pour la sécurité, seulement le formulaire est autorisé
-        # à faire des requêtes sur la base de données
-        # if not self.request.user.is_authenticated:
-        #     return Adresse.objects.none()
+    def get_list(self):
         if not self.q:
-            # Si rien n'est tapé, on retourne rien (pour éviter de faire une
-            # requête trop lourde)
-            return Adresse.objects.none()
-
-        # TODO: la requête devient extrêmement longue lorsque le nombre d'adresses
-        # est grand (1 million ça passe mais 22 millions pour la France entière
-        # c'est beaucoup trop long)
-        mots = self.q.strip().split(" ")
-        filtres = Q()
-        for mot in filter(None, mots):
-            filtres &= (
-                Q(numero__istartswith=mot)
-                | Q(complement__istartswith=mot)
-                | Q(voie__nom__icontains=mot)
-                | Q(voie__commune__nom__istartswith=mot)
-                | Q(voie__commune__code_postal__istartswith=mot)
+            return []
+        try:
+            response = requests.get(
+                "https://data.geopf.fr/geocodage/completion/",
+                {
+                    "text": self.q,
+                    "maximumResponses": 10,
+                    "type": "StreetAddress",
+                },
+                timeout=5,
             )
+            response.raise_for_status()  # Vérifie si la requête a réussi
+        except (requests.RequestException, ValueError):
+            return []
 
-        qs = Adresse.objects.filter(filtres)
+        result = response.json()
+        if (status := result.get("status")) != "OK":
+            return [f"Error status: {status}"]
 
-        return qs[: self.paginate_by]  # Limite le nombre de résultats par page
+        results = result.get("results")
+        if not results:
+            return []
+        return [value for result in results if (value := result.get("fulltext"))]
 
-    def get_result_label(self, result):  # noqa: PLR6301
-        """Fonction pour afficher le résultat de l'autocomplétion."""
-        return (
-            f"{result.numero} {result.complement} {result.voie.nom}, {result.voie.commune.nom} "
-            f"({result.voie.commune.code_postal})"
-        )
+    # On doit absolument surcharger cette méthode pour ne rien faire
+    # puisque par défaut, Select2ListView filtre les résultats qui ne contiennent
+    # pas self.q. On ne veut pas ça ici.
+    def autocomplete_results(self, results):  # noqa: PLR6301
+        return results
+
+
+# class AdresseAutocomplete(autocomplete.Select2QuerySetView):
+#     """Classe pour l'autocomplétion des adresses."""
+
+#     paginate_by = 10  # Limite le nombre de résultats par page
+
+#     def get_queryset(self):
+#         # Pour la sécurité, seulement le formulaire est autorisé
+#         # à faire des requêtes sur la base de données
+#         # if not self.request.user.is_authenticated:
+#         #     return Adresse.objects.none()
+#         if not self.q:
+#             # Si rien n'est tapé, on retourne rien (pour éviter de faire une
+#             # requête trop lourde)
+#             return Adresse.objects.none()
+
+#         # # TODO: la requête devient extrêmement longue lorsque le nombre d'adresses
+#         # # est grand (1 million ça passe mais 22 millions pour la France entière
+#         # # c'est beaucoup trop long)
+#         # mots = self.q.strip().split(" ")
+#         # filtres = Q()
+#         # for mot in filter(None, mots):
+#         #     filtres &= (
+#         #         Q(numero__istartswith=mot)
+#         #         | Q(complement__istartswith=mot)
+#         #         | Q(voie__nom__icontains=mot)
+#         #         | Q(voie__commune__nom__istartswith=mot)
+#         #         | Q(voie__commune__code_postal__istartswith=mot)
+#         #     )
+
+#         # qs = Adresse.objects.filter(filtres)
+
+#         return qs[: self.paginate_by]  # Limite le nombre de résultats par page
+
+#     def get_result_label(self, result):
+#         """Fonction pour afficher le résultat de l'autocomplétion."""
+#         return (
+#             f"{result.numero} {result.complement} {result.voie.nom}, {result.voie.commune.nom} "
+#             f"({result.voie.commune.code_postal})"
+#         )

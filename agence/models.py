@@ -1,3 +1,6 @@
+from typing import ClassVar
+
+import requests
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
 
@@ -18,38 +21,81 @@ class Commune(models.Model):
 
 
 class Voie(models.Model):
-    id_fantoir = models.CharField(max_length=10, unique=True)
     nom = models.CharField(max_length=255)
     commune = models.ForeignKey(Commune, models.PROTECT)
+
+    class Meta:
+        unique_together: ClassVar = [("nom", "commune")]
 
     def __str__(self):
         return f"{self.nom} - {self.commune}"
 
 
 class Adresse(models.Model):
+    id_ban = models.CharField(max_length=32, unique=True)
     voie = models.ForeignKey(Voie, models.PROTECT)
     numero = models.CharField(max_length=10, blank=True)
     complement = models.CharField(max_length=10, blank=True)
     longitude = models.FloatField(null=True, blank=True)
     latitude = models.FloatField(null=True, blank=True)
-    alias = models.CharField(max_length=255, blank=True)
+    label = models.CharField(max_length=255)
 
     def __str__(self):
-        num = f"{self.numero}{self.complement or ''}"
-        return f"{num} {self.voie}"
+        return self.label
 
-    def save(self, *args, **kwargs):
-        self.text_recherche = "".join([
-            str(i or "")
-            for i in (
-                self.numero,
-                self.complement,
-                self.voie.nom,
-                self.voie.commune.nom,
-                self.voie.commune.code_postal,
+    @classmethod
+    def from_texte(cls, texte: str) -> "Adresse":
+        texte = texte.strip()
+
+        # ! toute la doc est ici:
+        # https://adresse.data.gouv.fr/outils/api-doc/adresse
+        try:
+            response = requests.get(
+                "https://api-adresse.data.gouv.fr/search/",
+                {"q": texte, "limit": 1, "autocomplete": 0},
+                timeout=5,
             )
-        ]).lower()
-        super().save(*args, **kwargs)
+            response.raise_for_status()
+            result = response.json()
+            print(result)
+        except (requests.RequestException, ValueError) as e:
+            msg = "Adresse introuvable ou API inaccessible"
+            raise ValueError(msg) from e
+        try:
+            result = result["features"][0]
+            longitude, latitude = result["geometry"]["coordinates"]
+            prop = result["properties"]
+            commune_insee = prop["citycode"]
+            commune = prop["city"]
+            code_postal = prop["postcode"]
+
+            voie = prop["street"]
+
+            id_ban = prop["id"]
+            numero = prop.get("housenumber", "")
+            label = prop["label"]
+
+        except (KeyError, TypeError, ValueError) as e:
+            msg = "Réponse API invalide"
+            raise ValueError(msg) from e
+
+        # On vérifie si l'adresse existe déjà dans la BDD
+        if Adresse.objects.filter(id_ban=id_ban).exists():
+            return Adresse.objects.get(id_ban=id_ban)
+        commune, _ = Commune.objects.get_or_create(
+            code_insee=commune_insee, nom=commune, code_postal=code_postal
+        )
+        voie, _ = Voie.objects.get_or_create(nom=voie, commune=commune)
+        adresse, _ = cls.objects.get_or_create(
+            id_ban=id_ban,
+            voie=voie,
+            numero=numero,
+            complement="",  # TODO: à changer
+            longitude=longitude,
+            latitude=latitude,
+            label=label,
+        )
+        return adresse
 
 
 class Agence(models.Model):

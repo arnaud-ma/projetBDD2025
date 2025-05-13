@@ -5,14 +5,19 @@ téléchargées depuis https://adresse.data.gouv.fr/data/ban/adresses/latest/csv
 ATTENTION: ça suppose que le base de donnée est déjà créé avec les tables
 mais sans les données des adresses: tout ce qui concerne les adresses
 doit être complètement vide avant de lancer ce script.
+
+CE SCRIPT EST OBSOLETE ET NE SERT PLUS À RIEN.
 """
 
 import os
+import sys
+import warnings
 
 import django
 import pandas as pd
 import tqdm
 from django import conf
+from numpy import stack
 from sqlalchemy import create_engine
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "gestion_immo.settings")
@@ -184,4 +189,17 @@ def main(chunksize=CHUNK_SIZE, nb_rows: int | None = None):
 
 
 if __name__ == "__main__":
+    warnings.warn(
+        "The script est obsolète et ne sert plus à rien. "
+        "Puisque maintenant tout est fait avec l'api de data.gouv.fr "
+        " donc plus besoin de remplir les adresses localement. ",
+        stacklevel=2,
+    )
+    x = input(
+        "⚠️ Attention, ce script va remplir toutes les adresses de la base de données. "
+        "Êtes-vous sûr de vouloir continuer ? (o/n) "
+    )
+    if x.lower() != "o":
+        print("Abandon du script.")
+        sys.exit(0)
     main(chunksize=1_000_000, nb_rows=26_054_056)
