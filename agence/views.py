@@ -8,7 +8,6 @@ from django.db import connection
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render
-
 from agence.forms import UTILISATEURS_FORMS, AgenceForm, UtilisateurForm
 
 from .models import Adresse, Agence, Utilisateur
