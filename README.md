@@ -2,7 +2,7 @@
 
 ## Schéma de la base de données
 
-[lien vers drawdb](https://www.drawdb.app/editor?shareId=d45227d5d346325c65aa84d16d8766b3)
+[lien vers le schema](database_schema.svg)
 
 ## Installation
 
@@ -41,11 +41,31 @@
     uv run manage.py <command>
     ```
 
+## Peupler la base de données
+
+Pour peupler la base de données, il y a un script pour créer des données aléatoires.
+
+```bash
+uv run manage.py peupler_data [OPTIONS]
+```
+
+Les options disponibles sont :
+
+- `--n` : défaut à 100. Nombre indicatif sur le nombre de données à créer. Par exmeple le nombre d'utilisateurs vaut 100, le nombre d'agences est plus faible.
+- `locale`: défaut à `fr_FR`. Permet de changer la locale pour générer des données dans une autre langue. Par exemple, `en_US` pour l'anglais américain.
+- `--seed` : par défaut il n'y en a pas. Mettre une seed permet de générer les mêmes données à chaque fois si on utilise la même seed.
+
+> [!WARNING]
+> Les données ne sont pas forcément cohérentes entre elles, elles servent juste à tester,
+> il ne faut pas y attendre plus que ça.
+>
+> Il est possible d'utiliser le script lorsqu'il y a déjà des données existantes, mais forcément il y a un risque d'erreurs  de conflit (unicité, etc.) si on essaye de créer des données qui existent déjà.
+
 ## TODO
 
 - [X] Formulaire pour créer un utilisateur
-- [ ] Script pour peupler la base de données aléatoirement.
-- [ ] formulaire pour créer une nouvelle agence (**Arnaud**)
+- [X] Script pour peupler la base de données aléatoirement.
+- [X] formulaire pour créer une nouvelle agence (**Arnaud**)
 - [X] Adoucir la contrainte unique sur le numéro de téléphone pour inclure le null (**Arnaud**)
 - [ ] ajouter création d'un agent dans formulaire pour créer utilsisateur (**Arnaud**)
 - [ ] Ne plus avoir d'erreur quand un utilisateur déjà vendeur veut s'inscrire en tant qu'acheteur (**Prosper**)

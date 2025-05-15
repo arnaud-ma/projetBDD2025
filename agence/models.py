@@ -1,7 +1,8 @@
 from typing import ClassVar
 
 import requests
-from django.db import models
+from django.db import models, transaction
+from djmoney.models.fields import MoneyField
 from phonenumber_field.modelfields import PhoneNumberField
 
 # Create your models here.
@@ -32,7 +33,7 @@ class Voie(models.Model):
 
 
 class Adresse(models.Model):
-    id_ban = models.CharField(max_length=32, unique=True)
+    id_ban = models.CharField(max_length=64, unique=True)
     voie = models.ForeignKey(Voie, models.PROTECT)
     numero = models.CharField(max_length=10, blank=True)
     complement = models.CharField(max_length=10, blank=True)
@@ -82,20 +83,48 @@ class Adresse(models.Model):
         # On vérifie si l'adresse existe déjà dans la BDD
         if Adresse.objects.filter(id_ban=id_ban).exists():
             return Adresse.objects.get(id_ban=id_ban)
-        commune, _ = Commune.objects.get_or_create(
-            code_insee=commune_insee, nom=commune, code_postal=code_postal
-        )
-        voie, _ = Voie.objects.get_or_create(nom=voie, commune=commune)
-        adresse, _ = cls.objects.get_or_create(
-            id_ban=id_ban,
-            voie=voie,
-            numero=numero,
-            complement="",  # TODO: à changer
-            longitude=longitude,
-            latitude=latitude,
-            label=label,
-        )
+
+        # On encapsule la création de l'adresse dans une transaction
+        # pour garantir l'intégrité des données
+        with transaction.atomic():
+            commune, _ = Commune.objects.get_or_create(
+                code_insee=commune_insee, nom=commune, code_postal=code_postal
+            )
+            voie, _ = Voie.objects.get_or_create(nom=voie, commune=commune)
+            adresse, _ = cls.objects.get_or_create(
+                id_ban=id_ban,
+                voie=voie,
+                numero=numero,
+                complement="",  # TODO: à changer
+                longitude=longitude,
+                latitude=latitude,
+                label=label,
+            )
         return adresse
+
+    def create_label(self, *, only_if_not_exists=True, save=False) -> str:
+        """
+        Renvoie le label de l'adresse, le crée si il n'existe pas déjà.
+
+        :param only_if_not_exists: Si True et que le label existe déjà, renvoie
+            seulement le label existant.
+        :param save: Si True et que le label est créé, enregistre l'adresse dans la BDD.
+        :return: Le label de l'adresse.
+        """
+
+        if only_if_not_exists and self.label:
+            return self.label
+
+        parts = [self.numero, self.voie.nom]
+        if self.complement:
+            parts.append(self.complement)
+        parts.append(self.voie.commune.nom)
+        label = ", ".join(filter(None, parts))
+        if save:
+            with transaction.atomic():
+                self.label = label
+                self.save(update_fields=["label"])
+        return self.label
 
 
 class Agence(models.Model):
@@ -122,6 +151,12 @@ class InfosBien(models.Model):
     surface_habitable = models.FloatField(null=True)
     surface_terrain = models.FloatField(null=True)
     lieu = models.ForeignKey(Adresse, models.PROTECT, null=True)
+    description = models.TextField(blank=True, default="")
+    prix = MoneyField(
+        max_digits=14,
+        decimal_places=2,
+        default_currency="EUR",  # type: ignore
+    )
 
     def __str__(self):
         return (
@@ -146,7 +181,7 @@ class Bien(models.Model):
     agent = models.ForeignKey("Agent", models.CASCADE, null=True)  # TODO: remove null=True
 
     def __str__(self):
-        attrs = {"vendeur": self.vendeur, "etat_bien": self.etat.label}
+        attrs = {"vendeur": self.vendeur, "etat_bien": self.etat}
         if self.infos_bien:
             attrs["infos_bien"] = self.infos_bien
         return ", ".join(f"{k}: {v}" for k, v in attrs.items()) + f" ({self.pk})"
@@ -213,6 +248,7 @@ class Acheteur(ProxyUtilisateur, models.Model):
 
 
 class Agent(ProxyUtilisateur, models.Model):
+    utilisateur = models.OneToOneField(Utilisateur, models.CASCADE, primary_key=True)
     agence = models.ForeignKey(Agence, models.CASCADE)
 
     def __str__(self):
@@ -245,7 +281,7 @@ class FaitAchat(models.Model):
     etape_achat = models.IntegerField(choices=EtapeAchat.choices)
 
     def __str__(self):
-        return f"Fait achat de {self.acheteur} pour le bien {self.bien} ({self.etape_achat.label})"
+        return f"Fait achat de {self.acheteur} pour le bien {self.bien} ({self.etape_achat})"
 
 
 class RendezVous(models.Model):
@@ -271,11 +307,11 @@ class Avis(models.Model):
 class Message(models.Model):
     date = models.DateTimeField()
     contenu = models.TextField(blank=True, default="")
-    utilisateur = models.ForeignKey(Utilisateur, models.CASCADE)
+    auteur = models.ForeignKey(Utilisateur, models.CASCADE)
     fait_achat = models.ForeignKey(FaitAchat, models.CASCADE)
 
     def __str__(self):
-        return f"Message de {self.utilisateur} pour {self.fait_achat} ({self.date})"
+        return f"Message de {self.auteur} pour {self.fait_achat} ({self.date})"
 
 
 # endregion
