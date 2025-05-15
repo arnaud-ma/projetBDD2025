@@ -1,7 +1,7 @@
 from typing import ClassVar
 
 import requests
-from django.db import models
+from django.db import models, transaction
 from phonenumber_field.modelfields import PhoneNumberField
 
 # Create your models here.
@@ -82,20 +82,48 @@ class Adresse(models.Model):
         # On vérifie si l'adresse existe déjà dans la BDD
         if Adresse.objects.filter(id_ban=id_ban).exists():
             return Adresse.objects.get(id_ban=id_ban)
-        commune, _ = Commune.objects.get_or_create(
-            code_insee=commune_insee, nom=commune, code_postal=code_postal
-        )
-        voie, _ = Voie.objects.get_or_create(nom=voie, commune=commune)
-        adresse, _ = cls.objects.get_or_create(
-            id_ban=id_ban,
-            voie=voie,
-            numero=numero,
-            complement="",  # TODO: à changer
-            longitude=longitude,
-            latitude=latitude,
-            label=label,
-        )
+
+        # On encapsule la création de l'adresse dans une transaction
+        # pour garantir l'intégrité des données
+        with transaction.atomic():
+            commune, _ = Commune.objects.get_or_create(
+                code_insee=commune_insee, nom=commune, code_postal=code_postal
+            )
+            voie, _ = Voie.objects.get_or_create(nom=voie, commune=commune)
+            adresse, _ = cls.objects.get_or_create(
+                id_ban=id_ban,
+                voie=voie,
+                numero=numero,
+                complement="",  # TODO: à changer
+                longitude=longitude,
+                latitude=latitude,
+                label=label,
+            )
         return adresse
+
+    def create_label(self, *, only_if_not_exists=True, save=False) -> str:
+        """
+        Renvoie le label de l'adresse, le crée si il n'existe pas déjà.
+
+        :param only_if_not_exists: Si True et que le label existe déjà, renvoie
+            seulement le label existant.
+        :param save: Si True et que le label est créé, enregistre l'adresse dans la BDD.
+        :return: Le label de l'adresse.
+        """
+
+        if only_if_not_exists and self.label:
+            return self.label
+
+        parts = [self.numero, self.voie.nom]
+        if self.complement:
+            parts.append(self.complement)
+        parts.append(self.voie.commune.nom)
+        label = ", ".join(filter(None, parts))
+        if save:
+            with transaction.atomic():
+                self.label = label
+                self.save(update_fields=["label"])
+        return self.label
 
 
 class Agence(models.Model):
