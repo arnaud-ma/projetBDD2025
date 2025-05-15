@@ -172,7 +172,7 @@ class Utilisateur(models.Model):
     prenom = models.CharField(max_length=255)
     telephone = PhoneNumberField(null=True, blank=True, unique=True, default=None)
     email = models.EmailField(unique=True)
-
+    type_utilisateur = models.CharField(max_length=50)
     def __str__(self):
         coords = (self.email, self.telephone)  # récupérer les coordonnées
         coords = filter(None, coords)  # filtrer les coordonnées vides
@@ -200,11 +200,15 @@ class ProxyUtilisateur:
 
 class Vendeur(ProxyUtilisateur, models.Model):
     utilisateur = models.OneToOneField(Utilisateur, models.CASCADE, primary_key=True)
+
+
     pass
 
 
 class Acheteur(ProxyUtilisateur, models.Model):
     utilisateur = models.OneToOneField(Utilisateur, models.CASCADE, primary_key=True)
+
+
     critere_recherche = models.ForeignKey(InfosBien, models.CASCADE, null=True)
 
 
