@@ -1,13 +1,13 @@
 from typing import NamedTuple
-from django.db import transaction
+
 import requests
 from dal import autocomplete
-from django.contrib import messages  # <- Ajouté
+from django.contrib import messages
 from django.core.exceptions import BadRequest
-from django.db import connection
-from django.db.models import Q
-from django.http import HttpResponse
+from django.core.paginator import Paginator
+from django.db import connection, transaction
 from django.shortcuts import render
+
 from agence.forms import UTILISATEURS_FORMS, AgenceForm, UtilisateurForm
 
 from .models import Adresse, Agence, Utilisateur
@@ -63,7 +63,9 @@ def get_user_list():
             ) AS types_combined
             ON agence_utilisateur.id = types_combined.utilisateur_id
         GROUP BY
-            utilisateur_id, email;
+            utilisateur_id, email
+        ORDER BY
+            nom, prenom, email;
     """
     with connection.cursor() as cursor:
         cursor.execute(query)
@@ -72,8 +74,12 @@ def get_user_list():
 
 
 def list_users(request):
+    user_list = get_user_list()
+    paginator = Paginator(user_list, 10)  # 10 utilisateurs par page
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
     context = {
-        "user_list": get_user_list(),
+        "page_obj": page_obj,
     }
     return render(request, "agence/list_users.html", context)
 
@@ -84,8 +90,6 @@ def create_user_accueil(request):
         "agence/create_user.html",
         {"accueil": True, "user_forms": UTILISATEURS_FORMS, "type_utilisateur": "utilisateur"},
     )
-
-
 
 
 def create_user(request, type_utilisateur: str = "utilisateur"):
@@ -121,7 +125,7 @@ def create_user(request, type_utilisateur: str = "utilisateur"):
                 messages.success(request, "✅ Utilisateur créé avec succès !")
                 return render(request, "agence/create_user.html", {"form_utilisateur": UtilisateurForm()})
             except Exception as e:
-                messages.error(request, f"⚠️ Une erreur est survenue : {str(e)}")
+                messages.error(request, f"⚠️ Une erreur est survenue : {e!s}")
         else:
             messages.error(request, "⚠️ Veuillez corriger les erreurs ci-dessous.")
     else:

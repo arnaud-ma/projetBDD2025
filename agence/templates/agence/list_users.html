@@ -6,33 +6,59 @@
 <div class="list_users">
 <h1>Liste des Utilisateurs</h1>
 <table>
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Nom</th>
-            <th>Prénom</th>
-            <th>Email</th>
-            <th>Téléphone</th>
-            <th>Type(s) d'utilisateur</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for user in user_list %}
-            <tr>
-                <td>{{ user.id }}</td>
-                <td>{{ user.nom }}</td>
-                <td>{{ user.prenom }}</td>
-                <td>{{ user.email }}</td>
-                <td>{{ user.telephone }}</td>
-                <td>{{ user.types }}</td>
-            </tr>
-        {% empty %}
-            <tr>
-                <td colspan="6">Aucun utilisateur trouvé.</td>
-            </tr>
-        {% endfor %}
-    </tbody>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Nom</th>
+      <th>Prénom</th>
+      <th>Email</th>
+      <th>Téléphone</th>
+      <th>Type(s) d'utilisateur</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for user in page_obj %}
+      <tr>
+        <td>{{ user.id }}</td>
+        <td>{{ user.nom }}</td>
+        <td>{{ user.prenom }}</td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.telephone }}</td>
+        <td>{{ user.types }}</td>
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="6">Aucun utilisateur trouvé.</td>
+      </tr>
+    {% endfor %}
+  </tbody>
 </table>
+
+<!-- PAGINATION -->
+<div>
+  <div class="pagination">
+    <ul class="page-links">
+      {% if page_obj.has_previous %}
+        <li><a href="?page=1">&laquo; Première</a></li>
+        <li><a href="?page={{ page_obj.previous_page_number }}">&lsaquo; Précédente</a></li>
+      {% endif %}
+
+      {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+          <li><span class="current">{{ num }}</span></li>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+          <li><a href="?page={{ num }}">{{ num }}</a></li>
+        {% endif %}
+      {% endfor %}
+
+      {% if page_obj.has_next %}
+        <li><a href="?page={{ page_obj.next_page_number }}">Suivante &rsaquo;</a></li>
+        <li><a href="?page={{ page_obj.paginator.num_pages }}">Dernière &raquo;</a></li>
+      {% endif %}
+    </ul>
+  </div>
+</div>
+
 <br>
 </div>
 {% endblock content %}
