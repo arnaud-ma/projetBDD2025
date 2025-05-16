@@ -12,7 +12,7 @@ from agence.forms import UTILISATEURS_FORMS, AgenceForm, UtilisateurForm
 from django.core.exceptions import ValidationError
 from .models import Adresse, Agence, Utilisateur
 from . import models
-
+from django.http import HttpResponseBadRequest
 def index(request):
     return render(request, "agence/index.html")
 
@@ -89,11 +89,6 @@ def create_user_accueil(request):
 
 
 
-
-
-
-from django.http import HttpResponseBadRequest
-
 def create_user(request, type_utilisateur: str = "utilisateur"):
     user_form1_obj = UtilisateurForm
     user_form2_obj = UTILISATEURS_FORMS.get(type_utilisateur)
@@ -101,10 +96,10 @@ def create_user(request, type_utilisateur: str = "utilisateur"):
         return BadRequest("Type d'utilisateur invalide.")
 
     if request.method == "POST":
-        # On cherche d'abord un utilisateur existant avec cet email
+        # je cherche d'abord un utilisateur existant avec cet email
         utilisateur = models.Utilisateur.objects.filter(email=request.POST.get('email')).first()
 
-        # On crée le formulaire utilisateur en passant l'instance si existante
+        # je crée le formulaire utilisateur en passant l'instance si existante
         form1 = user_form1_obj(request.POST, instance=utilisateur)
         form2 = user_form2_obj(request.POST)
 
@@ -113,7 +108,7 @@ def create_user(request, type_utilisateur: str = "utilisateur"):
                 with transaction.atomic():
                     utilisateur = form1.save(commit=False)
 
-                    # Si nouvel utilisateur, on fixe le type_utilisateur
+                    # Si nouvel utilisateur, je fixe le type_utilisateur
                     if utilisateur.pk is None:
                         utilisateur.type_utilisateur = type_utilisateur
                         utilisateur.save()
@@ -130,11 +125,11 @@ def create_user(request, type_utilisateur: str = "utilisateur"):
                         if role_exists:
                             raise ValidationError(f"Cet utilisateur est déjà {type_utilisateur}.")
 
-                        # Sinon, on peut mettre à jour type_utilisateur si besoin
+                        # Sinon, je peut mettre à jour type_utilisateur si besoin
                         utilisateur.type_utilisateur = type_utilisateur
                         utilisateur.save()
 
-                    # Créer l'instance liée au rôle spécifique (acheteur, vendeur, agent)
+                    #  je Crée l'instance liée au rôle spécifique (acheteur, vendeur, agent)
                     instance = form2.save(commit=False)
                     instance.utilisateur = utilisateur
                     instance.save()

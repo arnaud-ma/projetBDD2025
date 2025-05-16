@@ -218,7 +218,7 @@ class Utilisateur(models.Model):
 
         return f"{self.prenom} {self.nom} {coords_str}"
     
-
+## cc arnaud , ici j'ai ajouté une fonction qui gère les roles multiples d'un utilisateur
     def get_roles(self):
         roles = []
         if hasattr(self, "acheteur"):
