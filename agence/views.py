@@ -87,6 +87,8 @@ def get_user_list():
                 SELECT utilisateur_id, 'acheteur' AS type_ FROM agence_acheteur
                 UNION ALL
                 SELECT utilisateur_id, 'vendeur' AS type_ FROM agence_vendeur
+                UNION ALL
+                SELECT utilisateur_id, 'agent' AS type_ FROM agence_agent
             ) AS types_combined
             ON agence_utilisateur.id = types_combined.utilisateur_id
         GROUP BY
@@ -139,22 +141,27 @@ class CreateUserView(View):
     def handle_role_submission(self, request):
         utilisateur_form = UtilisateurForm()
         role_forms = self.init_role_forms()
+        submitted_form_type = request.POST.get("form_type", None)
         for label, form_class in UTILISATEURS_FORMS.items():
             prefix = label.lower()
-            form = form_class(request.POST, prefix=prefix)
-            if form.is_valid():
-                email = form.cleaned_data.get("email")
-                utilisateur = get_or_none(Utilisateur, email=email)
-                if utilisateur is None:
-                    messages.error(request, f"⚠️ Aucun utilisateur trouvé avec l'email {email}.")
-                    role_forms[label] = form
-                    return self.render_page(request, utilisateur_form, role_forms)
+            if prefix == submitted_form_type:
+                form = form_class(request.POST, prefix=prefix)
+            else:
+                form = form_class(prefix=prefix)  # vide
+            role_forms[label] = form
+        form = role_forms.get(submitted_form_type, None)
+        if form and form.is_valid():
+            email = form.cleaned_data.get("email")
+            utilisateur = get_or_none(Utilisateur, email=email)
+            if utilisateur is None:
+                messages.error(request, f"⚠️ Aucun utilisateur trouvé avec l'email {email}.")
+                return self.render_page(request, utilisateur_form, role_forms)
 
-                instance = form.save(commit=False)
-                instance.utilisateur = utilisateur
-                instance.save()
-                messages.success(request, f"✅ {label} créé avec succès !")
-                return redirect(request.path)
+            instance = form.save(commit=False)
+            instance.utilisateur = utilisateur
+            instance.save()
+            messages.success(request, f"✅ {submitted_form_type} créé avec succès !")
+            return redirect(request.path)
             role_forms[label] = form
         messages.error(request, "⚠️ Veuillez corriger les erreurs spécifiques.")
         return self.render_page(request, utilisateur_form, role_forms)

@@ -144,19 +144,20 @@ class Agence(models.Model):
 
 
 class InfosBien(models.Model):
-    nb_chambres = models.IntegerField(null=True)
-    nb_salles_bain = models.IntegerField(null=True)
-    nb_garages = models.IntegerField(null=True)
-    nb_cuisines = models.IntegerField(null=True)
-    nb_wc = models.IntegerField(null=True)
-    surface_habitable = models.FloatField(null=True)
-    surface_terrain = models.FloatField(null=True)
-    lieu = models.ForeignKey(Adresse, models.PROTECT, null=True)
+    nb_chambres = models.IntegerField(null=True, blank=True)
+    nb_salles_bain = models.IntegerField(null=True, blank=True)
+    nb_garages = models.IntegerField(null=True, blank=True)
+    nb_cuisines = models.IntegerField(null=True, blank=True)
+    nb_wc = models.IntegerField(null=True, blank=True)
+    surface_habitable = models.FloatField(null=True, blank=True)
+    surface_terrain = models.FloatField(null=True, blank=True)
+    lieu = models.ForeignKey(Adresse, models.PROTECT, null=True, blank=True)
     description = models.TextField(blank=True, default="")
     prix = MoneyField(
         max_digits=14,
         decimal_places=2,
         default_currency="EUR",  # type: ignore
+        blank=True,
     )
 
     def __str__(self):

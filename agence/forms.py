@@ -23,6 +23,43 @@ def email_autocomplete_field():
         label="Email", widget=autocomplete.ListSelect2(url="email-autocomplete")
     )
 
+# ---------------------------------------------------------------------------- #
+#                                     Bien                                     #
+# ---------------------------------------------------------------------------- #
+
+
+class InfosBienForm(forms.ModelForm):
+    class Meta:
+        model = models.InfosBien
+        fields: ClassVar = [
+            "nb_chambres",
+            "nb_salles_bain",
+            "nb_garages",
+            "nb_cuisines",
+            "nb_wc",
+            "surface_habitable",
+            "surface_terrain",
+            "lieu",
+            # "description",
+            "prix",
+        ]
+        labels: ClassVar = {
+            "nb_chambres": "Nombre de chambres",
+            "nb_salles_bain": "Nombre de salles de bain",
+            "nb_garages": "Nombre de garages",
+            "nb_cuisines": "Nombre de cuisines",
+            "nb_wc": "Nombre de WC",
+            "surface_habitable": "Surface habitable (m²)",
+            "surface_terrain": "Surface du terrain (m²)",
+            # "description": "Description",
+            "prix": "Prix (en €)",
+        }
+        widgets: ClassVar = {
+            "lieu": autocomplete.ListSelect2(url="adresse-autocomplete"),
+            "prix": forms.NumberInput(attrs={"min": 0}),
+            # "description": forms.Textarea(attrs={"rows": 4}),
+        }
+
 
 # ---------------------------------------------------------------------------- #
 #                                 Utilisateurs                                 #
@@ -83,10 +120,50 @@ class AcheteurForm(forms.ModelForm):
         model = models.Acheteur
         # TODO: critere_recherche
         fields: ClassVar = []
-        # fields: ClassVar = ["critere_recherche"]
-        # labels: ClassVar = {
-        #     "critere_recherche": "Critères de recherche",
-        # }
+
+    # Tout le reste est fait pour inclure le formulaire InfosBienForm
+    # dans celui-ci sans avoir rien à faire autre part, comme si c'était qu'un
+    # seul formulaire
+
+    def __init__(self, *args, **kwargs):
+        data = kwargs.get("data", None)
+        instance = kwargs.get("instance", None)
+        self.infos_bien_instance = instance
+        super().__init__(*args, **kwargs)
+
+        self.infos_bien_form = InfosBienForm(
+            data=data,
+            instance=self.infos_bien_instance,
+            prefix=None,  # sans prefix
+        )
+
+        # on met à jour les champs du formulaire principal avec ceux de infos_bien_form
+        # puis on met à jour les valeurs initiales
+        self.fields.update(self.infos_bien_form.fields)
+        for name in self.infos_bien_form.fields.keys():
+            self.fields[name].initial = self.infos_bien_form.initial.get(name)
+
+    def is_valid(self):
+        """
+        On vérifie la validité du formulaire principal et de infos_bien_form
+        """
+        return super().is_valid() and self.infos_bien_form.is_valid()
+
+    def save(self, commit=True):  # noqa: FBT002
+        acheteur = super().save(commit=False)
+        infos_bien_data = {
+            name: self.cleaned_data[name]
+            for name in self.infos_bien_form.fields.keys()
+            if name in self.cleaned_data
+        }
+
+        infos_bien_form = InfosBienForm(infos_bien_data, instance=self.infos_bien_instance)
+        infos_bien = infos_bien_form.save(commit=False)
+        acheteur.critere_recherche = infos_bien
+        if commit:
+            infos_bien_form.save()
+            acheteur.save()
+        return acheteur
 
 
 @enregistrer_utilisateur_form("Vendeur")

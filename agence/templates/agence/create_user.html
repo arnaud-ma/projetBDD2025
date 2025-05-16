@@ -22,7 +22,9 @@
       <div class="container">
         <form method="post">
           {% csrf_token %}
-          {{ role_form }}
+          <input type="hidden" name="role" value="{{ label }}"> <!-- On envoie le role pour savoir quel formulaire on doit traiter -->
+          {% include 'agence/_form_fields.html' with form=role_form %}
+
 
         {% comment %}
         Pour une raison inconnue le bouton est surélevé par rapport aux autres formulaires
