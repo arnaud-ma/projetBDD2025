@@ -7,9 +7,16 @@ from django.core.exceptions import BadRequest
 from django.core.paginator import Paginator
 from django.db import connection, transaction
 from django.forms import ValidationError
-from django.shortcuts import render
+from django.shortcuts import redirect, render
+from django.views import View
 
-from agence.forms import UTILISATEURS_FORMS, AgenceForm, UtilisateurForm
+from agence.forms import (
+    UTILISATEURS_FORMS,
+    AgenceForm,
+    TypeUtilisateurForm,
+    UtilisateurForm,
+    empty_utilisateur_forms,
+)
 
 from .models import Acheteur, FaitAchat, Utilisateur
 
@@ -55,6 +62,9 @@ def get_user_list():
     #   l'id utilisateur et la colonne créée
     # 3. On fait un group by sur l'id utilisateur, puis une aggrégation pour
     #    sur ces groupes qui fait l'équivalent de ",".join(type_).
+    # 4. Pour inclure les utilisateurs qui n'ont pas de type, on fait un LEFT JOIN
+    #    entre la table utilisateur et le résultat de l'étape 3, et on fait un
+    #    COALESCE pour remplacer les valeurs NULL par "aucune type".
 
     # ! ça fonctionne puisqu'on est sur sqlite, sur d'autre sgbd le ",".join()
     # peut avoir un autre nom complètement différent:
@@ -69,10 +79,10 @@ def get_user_list():
             telephone,
             nom,
             prenom,
-            GROUP_CONCAT(type_ ORDER BY type_) AS types
+            GROUP_CONCAT(COALESCE(type_, 'aucune type') ORDER BY type_) AS types
         FROM
             agence_utilisateur
-        JOIN
+        LEFT JOIN
             (
                 SELECT utilisateur_id, 'acheteur' AS type_ FROM agence_acheteur
                 UNION ALL
@@ -101,100 +111,71 @@ def list_users(request):
     return render(request, "agence/list_users.html", context)
 
 
-def create_user_accueil(request):
-    return render(
-        request,
-        "agence/create_user.html",
-        {"accueil": True, "user_forms": UTILISATEURS_FORMS, "type_utilisateur": "utilisateur"},
-    )
+class CreateUserView(View):
+    template_name = "agence/create_user.html"
 
-def create_user(request, type_utilisateur: str = "utilisateur"):
-    user_form1_obj = UtilisateurForm
-    user_form2_obj = UTILISATEURS_FORMS.get(type_utilisateur)
-    if user_form2_obj is None:
-        return BadRequest("Type d'utilisateur invalide.")
+    def get(self, request):
+        utilisateur_form = UtilisateurForm()
+        role_forms = self.init_role_forms()
+        return self.render_page(request, utilisateur_form, role_forms)
 
-    if request.method == "POST":
-        # je cherche d'abord un utilisateur existant avec cet email
-        utilisateur = Utilisateur.objects.filter(email=request.POST.get("email")).first()
+    def post(self, request):
+        est_utilisateur_form = "nom" in request.POST
+        if est_utilisateur_form:
+            return self.handle_utilisateur_submission(request)
+        return self.handle_role_submission(request)
 
-        # je crée le formulaire utilisateur en passant l'instance si existante
-        form1 = user_form1_obj(request.POST, instance=utilisateur)
-        form2 = user_form2_obj(request.POST)
-
-        if form1.is_valid() and form2.is_valid():
-            try:
-                with transaction.atomic():
-                    utilisateur = form1.save(commit=False)
-
-                    # Si nouvel utilisateur, je fixe le type_utilisateur
-                    if utilisateur.pk is None:
-                        utilisateur.type_utilisateur = type_utilisateur
-                        utilisateur.save()
-                    utilisateur = form1.save(commit=False)
-
-                    # Si nouvel utilisateur, je fixe le type_utilisateur
-                    if utilisateur.pk is None:
-                        utilisateur.type_utilisateur = type_utilisateur
-                        utilisateur.save()
-                    else:
-                        # L'utilisateur existe déjà, vérifier s'il a déjà ce rôle
-                        role_exists = False
-                        if type_utilisateur == "acheteur" and hasattr(utilisateur, "acheteur"):
-                            role_exists = True
-                        elif type_utilisateur == "vendeur" and hasattr(utilisateur, "vendeur"):
-                            role_exists = True
-                        elif type_utilisateur == "agent" and hasattr(utilisateur, "agent"):
-                            role_exists = True
-
-                        if role_exists:
-                            msg = f"Cet utilisateur est déjà {type_utilisateur}."
-                            raise ValidationError(msg)
-
-                        # Sinon, je peut mettre à jour type_utilisateur si besoin
-                        utilisateur.type_utilisateur = type_utilisateur
-                        utilisateur.save()
-
-                    #  je Crée l'instance liée au rôle spécifique (acheteur, vendeur, agent)
-                    #  je Crée l'instance liée au rôle spécifique (acheteur, vendeur, agent)
-                    instance = form2.save(commit=False)
-                    instance.utilisateur = utilisateur
-                    instance.save()
-
-                messages.success(request, "✅ Utilisateur créé avec succès !")
-                return render(request, "agence/create_user.html", {"form_utilisateur": UtilisateurForm()})
-
-            except ValidationError as ve:
-                messages.error(request, f"⚠️ {ve.message}")
-
-            except ValidationError as ve:
-                messages.error(request, f"⚠️ {ve.message}")
-            except Exception as e:
-                messages.error(request, f"⚠️ Une erreur est survenue : {e!s}")
-                messages.error(request, f"⚠️ Une erreur est survenue : {e!s}")
+    def handle_utilisateur_submission(self, request):
+        form = UtilisateurForm(request.POST)
+        role_forms = self.init_role_forms()
+        if form.is_valid():
+            form.save()
+            messages.success(request, "✅ Utilisateur créé avec succès !")
+            return redirect(request.path)
         else:
-            messages.error(request, "⚠️ Veuillez corriger les erreurs ci-dessous.")
+            messages.error(request, "⚠️ Veuillez corriger les erreurs.")
+        return self.render_page(request, form, role_forms)
 
+    def handle_role_submission(self, request):
+        utilisateur_form = UtilisateurForm()
+        role_forms = self.init_role_forms()
+        for label, form_class in UTILISATEURS_FORMS.items():
+            prefix = label.lower()
+            form = form_class(request.POST, prefix=prefix)
+            if form.is_valid():
+                email = form.cleaned_data.get("email")
+                utilisateur = get_or_none(Utilisateur, email=email)
+                if utilisateur is None:
+                    messages.error(request, f"⚠️ Aucun utilisateur trouvé avec l'email {email}.")
+                    role_forms[label] = form
+                    return self.render_page(request, utilisateur_form, role_forms)
 
-    else:
-        form1 = user_form1_obj()
-        form2 = user_form2_obj()
+                instance = form.save(commit=False)
+                instance.utilisateur = utilisateur
+                instance.save()
+                messages.success(request, f"✅ {label} créé avec succès !")
+                return redirect(request.path)
+            role_forms[label] = form
+        messages.error(request, "⚠️ Veuillez corriger les erreurs spécifiques.")
+        return self.render_page(request, utilisateur_form, role_forms)
 
-    return render(
-        request,
-        "agence/create_user.html",
-        {
-            "form_utilisateur": form1,
-            "form_utilisateur_spec": form2,
-            "type_utilisateur": type_utilisateur,
-            "user_forms": UTILISATEURS_FORMS,
-            "accueil": False,
-        },
-    )
+    def render_page(self, request, utilisateur_form, role_forms):
+        return render(
+            request,
+            self.template_name,
+            {
+                "form_utilisateur": utilisateur_form,
+                "role_forms": role_forms,
+                "type_utilisateur": "utilisateur",
+            },
+        )
 
-
-
-
+    @staticmethod
+    def init_role_forms():
+        return {
+            label: form_class(prefix=label.lower())
+            for label, form_class in UTILISATEURS_FORMS.items()
+        }
 
 # ---------------------------------------------------------------------------- #
 #                                    Agence                                    #
@@ -222,7 +203,7 @@ def create_agence(request):
 
 
 # ---------------------------------------------------------------------------- #
-#                                   Adresses                                   #
+#                                  Autocomplete                                #
 # ---------------------------------------------------------------------------- #
 
 
@@ -258,6 +239,20 @@ class AdresseAutocomplete(autocomplete.Select2ListView):
     # On doit absolument surcharger cette méthode pour ne rien faire
     # puisque par défaut, Select2ListView filtre les résultats qui ne contiennent
     # pas self.q. On ne veut pas ça ici.
+
+    def autocomplete_results(self, results):  # noqa: PLR6301
+        return results
+
+
+class EmailAutocomplete(autocomplete.Select2ListView):
+    def get_list(self):
+        qs = Utilisateur.objects.all()
+        # if not self.request.user.is_authenticated:
+        #     return qs.none()
+        qs = (
+            qs.filter(email__contains=self.q).order_by("email").values_list("email", flat=True)[:10]
+        )
+        return list(map(str, qs))
 
     def autocomplete_results(self, results):  # noqa: PLR6301
         return results

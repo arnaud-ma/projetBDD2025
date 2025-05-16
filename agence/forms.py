@@ -1,17 +1,33 @@
 from typing import ClassVar
 
-import requests
 from bidict import bidict
 from dal import autocomplete
 from django import forms
 from phonenumber_field.formfields import PhoneNumberField
 from phonenumber_field.widgets import RegionalPhoneNumberWidget
 
+from agence.models import Agent, Utilisateur
+
 from . import models
+
+
+def get_or_none(classmodel, **kwargs):
+    try:
+        return classmodel.objects.get(**kwargs)
+    except classmodel.DoesNotExist:
+        return None
+
+
+def email_autocomplete_field():
+    return forms.CharField(
+        label="Email", widget=autocomplete.ListSelect2(url="email-autocomplete")
+    )
+
 
 # ---------------------------------------------------------------------------- #
 #                                 Utilisateurs                                 #
 # ---------------------------------------------------------------------------- #
+
 
 UTILISATEURS_FORMS: bidict[str, type[forms.ModelForm]] = bidict()
 
@@ -25,10 +41,17 @@ def enregistrer_utilisateur_form(model_name: str):
     """
 
     def decorator(form_class: type[forms.ModelForm]):
+        # if not hasattr(form_class, "email"):
+        #     msg = f"la classe {form_class!r} doit avoir l'attribut 'email'"
+        #     raise AttributeError(msg, name=None)
         UTILISATEURS_FORMS[model_name.lower()] = form_class
         return form_class
 
     return decorator
+
+
+def empty_utilisateur_forms():
+    return {lbl: form(prefix=lbl) for lbl, form in UTILISATEURS_FORMS.items()}
 
 
 class UtilisateurForm(forms.ModelForm):
@@ -47,8 +70,15 @@ class UtilisateurForm(forms.ModelForm):
         return self.cleaned_data.get("telephone") or None
 
 
+class TypeUtilisateurForm(forms.Form):
+    type_utilisateur = forms.ChoiceField(
+        choices=[(k, k) for k in UTILISATEURS_FORMS.keys()], label="type d'utilisateur"
+    )
+
+
 @enregistrer_utilisateur_form("Acheteur")
 class AcheteurForm(forms.ModelForm):
+    email = email_autocomplete_field()
     class Meta:
         model = models.Acheteur
         # TODO: critere_recherche
@@ -61,6 +91,7 @@ class AcheteurForm(forms.ModelForm):
 
 @enregistrer_utilisateur_form("Vendeur")
 class VendeurForm(forms.ModelForm):
+    email = email_autocomplete_field()
     class Meta:
         model = models.Vendeur
         fields: ClassVar = []
@@ -68,6 +99,7 @@ class VendeurForm(forms.ModelForm):
 
 @enregistrer_utilisateur_form("Agent")
 class AgentForm(forms.ModelForm):
+    email = email_autocomplete_field()
     class Meta:
         model = models.Agent
         fields: ClassVar = ["agence"]
@@ -75,6 +107,14 @@ class AgentForm(forms.ModelForm):
             "agence": "Agence",
         }
 
+    def clean_email(self):
+        if not Utilisateur.objects.filter(email=self.email):
+            msg = "Aucun utilisateur ne possède cet email"
+            raise forms.ValidationError(msg)
+        if Agent.objects.filter(email=self.email):
+            msg = "L'utilisateur est déjà un agent"
+            raise forms.ValidationError(msg)
+        return self.email
 
 # ---------------------------------------------------------------------------- #
 #                                    Agence                                    #

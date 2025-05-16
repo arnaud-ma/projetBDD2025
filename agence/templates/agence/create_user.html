@@ -1,44 +1,60 @@
 {% extends 'agence/base.html' %}
+{% load static %}
 {% block title %}
   Création des {{ type_utilisateur }}s
 {% endblock %}
 
 {% block content %}
   <div class="formulaire">
-    <h1>Création d'un {{ type_utilisateur }}</h1>
+    <h1>Création d'un utilisateur</h1>
     <div class="container">
-      {% if accueil %}
-        <h2>Choix de l'utilisateur</h2>
-        <p>Choisissez le type d'utilisateur que vous souhaitez créer.</p>
-        <ul>
-          {% for user in user_forms.keys %}
-            <li>
-              <a href="{% url 'create_user' user %}">{{ user|capfirst }}</a>
-            </li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        {% include 'agence/_messages.html' with messages=messages %}
+      {% include 'agence/_messages.html' with messages=messages %}
 
+      <form method="post">
+        {% csrf_token %}
+        {% include 'agence/_form_fields.html' with form=form_utilisateur %}
+        <button type="submit">Soumettre</button>
+      </form>
+    </div>
+
+    {% for label, role_form in role_forms.items %}
+      <h1>Création d'un {{ label }}</h1>
+      <div class="container">
         <form method="post">
           {% csrf_token %}
-          <!--
-        On pourrait juste utiliser {{form}}
-        mais on le fait à la main pour le personnaliser
-        (en particulier pour les erreurs)
+          {{ role_form }}
 
-        On itère donc sur chaque champ du formulaire en affichant son label
-        et un champ de saisie
-        Et si il y a des erreurs, on les affiche en tant que liste
-        juste en dessous du champ.
-        Les détails sur le formulaire sont dans le fichier forms.py
-            -->
-          {% include "agence/_form_fields.html" with form=form_utilisateur %}
-          {% include "agence/_form_fields.html" with form=form_utilisateur_spec %}
-          <!-- Bouton de soumission -->
-          <button type="submit">Soumettre</button>
+        {% comment %}
+        Pour une raison inconnue le bouton est surélevé par rapport aux autres formulaires
+        Sûrement à cause du widget autocomplete. On doit donc rajouter une couche de style ici
+        {% endcomment %}
+        <button type="submit" style="margin-top: 20px" >Soumettre</button>
         </form>
-      {% endif %}
-    </div>
+      </div>
+    {% endfor %}
+
   </div>
+{% endblock %}
+
+{% comment %}Le reste est du code boilerplate qui soit être rajouté pour avoir l'autocompletion des adresses{% endcomment %}
+{% block extra_footer %}
+  <script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+  {% for form in role_forms.values %}
+    {{ form.media }}
+  {% endfor %}
+
+  <script>
+    ;(function ($) {
+      $('#add-form').click(function () {
+        var index = $('#id_inline_test_models-TOTAL_FORMS').val()
+        var newTable = $('#id_inline_test_models-__prefix__-DELETE').parents('table').clone()
+        newTable.find(':input').each(function () {
+          for (attr of ['name', 'id']) $(this).attr(attr, $(this).attr(attr).replace('__prefix__', index))
+        })
+        newTable.insertBefore($(this))
+        $('#id_inline_test_models-TOTAL_FORMS').val(parseInt($('#id_inline_test_models-TOTAL_FORMS').val()) + 1)
+        newTable.slideDown()
+      })
+    })($)
+  </script>
 {% endblock %}

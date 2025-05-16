@@ -1,6 +1,7 @@
 from typing import ClassVar
 
 import requests
+from bidict import bidict
 from django.db import models, transaction
 from djmoney.models.fields import MoneyField
 from phonenumber_field.modelfields import PhoneNumberField
@@ -133,7 +134,7 @@ class Agence(models.Model):
     telephone = PhoneNumberField(null=True, blank=True, unique=True, default=None)
 
     def __str__(self):
-        return f"{self.nom} située à {self.adresse}"
+        return f"{self.nom}"
 
 
 # endregion
@@ -207,7 +208,6 @@ class Utilisateur(models.Model):
     prenom = models.CharField(max_length=255)
     telephone = PhoneNumberField(null=True, blank=True, unique=True, default=None)
     email = models.EmailField(unique=True)
-    type_utilisateur = models.CharField(max_length=50)
 
     def __str__(self):
         coords = (self.email, self.telephone)  # récupérer les coordonnées
@@ -219,20 +219,24 @@ class Utilisateur(models.Model):
 
         return f"{self.prenom} {self.nom} {coords_str}"
 
-    # cc arnaud , ici j'ai ajouté une fonction qui gère les roles multiples d'un utilisateur
-    def get_roles(self):
-        roles = []
-        if hasattr(self, "acheteur"):
-            roles.append("acheteur")
-        if hasattr(self, "vendeur"):
-            roles.append("vendeur")
-        if hasattr(self, "agent"):
-            roles.append("agent")
-        return roles
-
 
 class ProxyUtilisateur:
     """Classe proxy pour Utilisateur."""
+
+    TYPE_UTILISATEURS: ClassVar[bidict] = bidict()
+
+    def __init_subclass__(cls, *args, name=None, **kwargs):
+        super().__init_subclass__(*args, **kwargs)
+        # On enregistre la classe dans le dict
+        if name is None:
+            name = cls.__name__.lower()
+        if cls is not ProxyUtilisateur and cls not in ProxyUtilisateur.TYPE_UTILISATEURS:
+            ProxyUtilisateur.TYPE_UTILISATEURS[cls.__name__.lower()] = cls
+
+        # # On enregistre le type d'utilisateur dans la classe bidict
+        # if not hasattr(cls, "TYPE_UTILISATEURS"):
+        #     cls.TYPE_UTILISATEURS = bidict()
+        # cls.TYPE_UTILISATEURS[cls.__name__.lower()] = cls
 
     def __str__(self):
         coords = (self.utilisateur.email, self.utilisateur.telephone)  # récupérer les coordonnées
