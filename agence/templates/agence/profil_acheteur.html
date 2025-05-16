@@ -1,0 +1,21 @@
+{% extends 'agence/base.html' %}
+{% block title %}
+  Profil utilisateur
+{% endblock %}
+
+{% block content %}
+  <div class="profil_acheteur">
+  <h1>Profil de l'acheteur {{ user.nom }} {{ user.prenom }}</h1>
+
+  <h2>Achats en cours</h2>
+  <ul>
+    {% for fait_achat in faits_achat %}
+      <li>
+        {{ fait_achat }}
+      </li>
+    {% empty %}
+      <li>Aucun achat en cours.</li>
+    {% endfor %}
+  </ul>
+  </div>
+{% endblock %}

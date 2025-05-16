@@ -6,11 +6,28 @@ from django.contrib import messages
 from django.core.exceptions import BadRequest
 from django.core.paginator import Paginator
 from django.db import connection, transaction
+from django.forms import ValidationError
 from django.shortcuts import render
 
 from agence.forms import UTILISATEURS_FORMS, AgenceForm, UtilisateurForm
 
-from .models import Adresse, Agence, Utilisateur
+from .models import Acheteur, FaitAchat, Utilisateur
+
+# ---------------------------------------------------------------------------- #
+#                                     Utils                                    #
+# ---------------------------------------------------------------------------- #
+
+
+def get_or_none(classmodel, **kwargs):
+    try:
+        return classmodel.objects.get(**kwargs)
+    except classmodel.DoesNotExist:
+        return None
+
+
+# ---------------------------------------------------------------------------- #
+#                                     Index                                    #
+# ---------------------------------------------------------------------------- #
 
 
 def index(request):
@@ -99,35 +116,56 @@ def create_user(request, type_utilisateur: str = "utilisateur"):
         return BadRequest("Type d'utilisateur invalide.")
 
     if request.method == "POST":
-        form1 = user_form1_obj(request.POST)
+        # je cherche d'abord un utilisateur existant avec cet email
+        utilisateur = Utilisateur.objects.filter(email=request.POST.get("email")).first()
+
+        # je crée le formulaire utilisateur en passant l'instance si existante
+        form1 = user_form1_obj(request.POST, instance=utilisateur)
         form2 = user_form2_obj(request.POST)
 
         if form1.is_valid() and form2.is_valid():
             try:
                 with transaction.atomic():
-                    # Recherche si l'utilisateur existe déjà
-                    utilisateur = Utilisateur.objects.filter(email=form1.cleaned_data['email']).first()
-                    if utilisateur is None:
-                        utilisateur = form1.save(commit=False)  # Créer un nouvel utilisateur si inexistant
+                    utilisateur = form1.save(commit=False)
+
+                    # Si nouvel utilisateur, je fixe le type_utilisateur
+                    if utilisateur.pk is None:
+                        utilisateur.type_utilisateur = type_utilisateur
+                        utilisateur.save()
                     else:
-                        # Si l'utilisateur existe déjà, on met à jour le formulaire avec l'utilisateur existant
-                        form1 = UtilisateurForm(instance=utilisateur)
+                        # L'utilisateur existe déjà, vérifier s'il a déjà ce rôle
+                        role_exists = False
+                        if type_utilisateur == "acheteur" and hasattr(utilisateur, "acheteur"):
+                            role_exists = True
+                        elif type_utilisateur == "vendeur" and hasattr(utilisateur, "vendeur"):
+                            role_exists = True
+                        elif type_utilisateur == "agent" and hasattr(utilisateur, "agent"):
+                            role_exists = True
 
-                    # S'assurer que le type_utilisateur est bien attribué
-                    utilisateur.type_utilisateur = type_utilisateur
-                    utilisateur.save()
+                        if role_exists:
+                            msg = f"Cet utilisateur est déjà {type_utilisateur}."
+                            raise ValidationError(msg)
 
-                    # Créer l'instance spécifique (par exemple, Acheteur, Vendeur) et l'associer à l'utilisateur
+                        # Sinon, je peut mettre à jour type_utilisateur si besoin
+                        utilisateur.type_utilisateur = type_utilisateur
+                        utilisateur.save()
+
+                    #  je Crée l'instance liée au rôle spécifique (acheteur, vendeur, agent)
                     instance = form2.save(commit=False)
                     instance.utilisateur = utilisateur
                     instance.save()
 
                 messages.success(request, "✅ Utilisateur créé avec succès !")
                 return render(request, "agence/create_user.html", {"form_utilisateur": UtilisateurForm()})
+
+            except ValidationError as ve:
+                messages.error(request, f"⚠️ {ve.message}")
             except Exception as e:
+                messages.error(request, f"⚠️ Une erreur est survenue : {e!s}")
                 messages.error(request, f"⚠️ Une erreur est survenue : {e!s}")
         else:
             messages.error(request, "⚠️ Veuillez corriger les erreurs ci-dessous.")
+
     else:
         form1 = user_form1_obj()
         form2 = user_form2_obj()
@@ -174,6 +212,7 @@ def create_agence(request):
 #                                   Adresses                                   #
 # ---------------------------------------------------------------------------- #
 
+
 class AdresseAutocomplete(autocomplete.Select2ListView):
     """Classe pour l'autocomplétion des adresses."""
 
@@ -206,5 +245,35 @@ class AdresseAutocomplete(autocomplete.Select2ListView):
     # On doit absolument surcharger cette méthode pour ne rien faire
     # puisque par défaut, Select2ListView filtre les résultats qui ne contiennent
     # pas self.q. On ne veut pas ça ici.
+
     def autocomplete_results(self, results):  # noqa: PLR6301
         return results
+
+
+# ---------------------------------------------------------------------------- #
+#                                Profil Acheteur                               #
+# ---------------------------------------------------------------------------- #
+
+
+def profil_acheteur(request, utilisateur_id):
+    context: dict = {"acheteur": None, "utilisateur": None}
+    utilisateur = get_or_none(Utilisateur, id=utilisateur_id)
+    if utilisateur is None:
+        messages.error(request, "⚠️ Utilisateur non trouvé.")
+        return render(request, "agence/profil_acheteur.html", context)
+    context["utilisateur"] = utilisateur
+
+    acheteur = get_or_none(Acheteur, utilisateur=utilisateur)
+    if acheteur is None:
+        messages.error(request, "⚠️ Acheteur non trouvé pour cet utilisateur.")
+        return render(
+            request, "agence/profil_acheteur.html", {"acheteur": None, "utilisateur": utilisateur}
+        )
+    context["acheteur"] = acheteur
+    context["faits_achat"] = FaitAchat.objects.filter(acheteur=acheteur)
+    messages.success(request, "✅ Profil acheteur chargé avec succès.")
+    return render(
+        request,
+        "agence/profil_acheteur.html",
+        context,
+    )

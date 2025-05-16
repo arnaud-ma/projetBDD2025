@@ -52,7 +52,7 @@ uv run manage.py peupler_data [OPTIONS]
 Les options disponibles sont :
 
 - `--n` : défaut à 100. Nombre indicatif sur le nombre de données à créer. Par exmeple le nombre d'utilisateurs vaut 100, le nombre d'agences est plus faible.
-- `locale`: défaut à `fr_FR`. Permet de changer la locale pour générer des données dans une autre langue. Par exemple, `en_US` pour l'anglais américain.
+- `--locale`: défaut à `fr_FR`. Permet de changer la locale pour générer des données dans une autre langue. Par exemple, `en_US` pour l'anglais américain.
 - `--seed` : par défaut il n'y en a pas. Mettre une seed permet de générer les mêmes données à chaque fois si on utilise la même seed.
 
 > [!WARNING]
@@ -68,7 +68,7 @@ Les options disponibles sont :
 - [X] formulaire pour créer une nouvelle agence (**Arnaud**)
 - [X] Adoucir la contrainte unique sur le numéro de téléphone pour inclure le null (**Arnaud**)
 - [ ] ajouter création d'un agent dans formulaire pour créer utilsisateur (**Arnaud**)
-- [ ] Ne plus avoir d'erreur quand un utilisateur déjà vendeur veut s'inscrire en tant qu'acheteur (**Prosper**)
+- [X] Ne plus avoir d'erreur quand un utilisateur déjà vendeur veut s'inscrire en tant qu'acheteur (**Prosper**)
 - [ ] Critère de recherche pour les acheteurs (**Prosper**)
 - [ ] Formulaire pour créer un bien (**Prosper**)
 - [ ] Liste des biens à proximité du critère de recherche de l'acheteur (ne pas forcément exclure les biens qui correspondent pas exactement à tous les critères) (**Arnaud**)

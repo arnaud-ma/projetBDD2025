@@ -2,12 +2,6 @@
 /*                                    Base                                    */
 /* -------------------------------------------------------------------------- */
 
-.wrapper {
-    flex: 1 0 auto;
-    padding-bottom: 60px;
-    /* espace réservé pour ne pas que le contenu passe sous le footer */
-}
-
 footer {
     flex-shrink: 0;
     text-align: center;

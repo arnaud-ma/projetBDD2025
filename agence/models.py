@@ -208,6 +208,7 @@ class Utilisateur(models.Model):
     telephone = PhoneNumberField(null=True, blank=True, unique=True, default=None)
     email = models.EmailField(unique=True)
     type_utilisateur = models.CharField(max_length=50)
+
     def __str__(self):
         coords = (self.email, self.telephone)  # récupérer les coordonnées
         coords = filter(None, coords)  # filtrer les coordonnées vides
@@ -217,6 +218,17 @@ class Utilisateur(models.Model):
             coords_str = f" ({coords_str})"
 
         return f"{self.prenom} {self.nom} {coords_str}"
+
+    # cc arnaud , ici j'ai ajouté une fonction qui gère les roles multiples d'un utilisateur
+    def get_roles(self):
+        roles = []
+        if hasattr(self, "acheteur"):
+            roles.append("acheteur")
+        if hasattr(self, "vendeur"):
+            roles.append("vendeur")
+        if hasattr(self, "agent"):
+            roles.append("agent")
+        return roles
 
 
 class ProxyUtilisateur:
@@ -237,12 +249,8 @@ class Vendeur(ProxyUtilisateur, models.Model):
     utilisateur = models.OneToOneField(Utilisateur, models.CASCADE, primary_key=True)
 
 
-    pass
-
-
 class Acheteur(ProxyUtilisateur, models.Model):
     utilisateur = models.OneToOneField(Utilisateur, models.CASCADE, primary_key=True)
-
 
     critere_recherche = models.ForeignKey(InfosBien, models.CASCADE, null=True)
 
