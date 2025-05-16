@@ -2,11 +2,40 @@
 /*                                    Base                                    */
 /* -------------------------------------------------------------------------- */
 
+.wrapper {
+    flex: 1 0 auto;
+    padding-bottom: 60px;
+    /* espace réservé pour ne pas que le contenu passe sous le footer */
+}
+
+footer {
+    flex-shrink: 0;
+    text-align: center;
+    padding: 10px;
+    background-color: #333;
+    color: white;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 60px;
+    /* fixe la hauteur du footer */
+    box-sizing: border-box;
+}
+
 body {
+    height: 100%;
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
     background-color: #f9f9f9;
+    display: flex;
+    flex-direction: column;
+}
+
+.wrapper {
+    flex: 1 0 auto;
+    padding-bottom: 60px;
+    /* espace réservé pour ne pas que le contenu passe sous le footer */
 }
 
 header {
@@ -43,6 +72,7 @@ main {
 }
 
 footer {
+    flex-shrink: 0;
     text-align: center;
     padding: 10px;
     background-color: #333;
@@ -50,6 +80,8 @@ footer {
     position: fixed;
     bottom: 0;
     width: 100%;
+    height: 60px;
+    box-sizing: border-box;
 }
 
 h1 {
@@ -151,4 +183,44 @@ h1 {
 
 .list_users th {
     background-color: #f4f4f4;
+}
+
+/* pagination */
+.pagination {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.pagination .page-links {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.pagination .page-links li {
+    margin: 0;
+}
+
+.pagination .page-links a,
+.pagination .page-links span.current {
+    display: inline-block;
+    background-color: #4CAF50;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+}
+
+.pagination .page-links a:hover {
+    background-color: #45a049;
+}
+
+.pagination .page-links span.current {
+    background-color: #388E3C;
+    /* un vert plus foncé pour la page active */
 }
