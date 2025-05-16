@@ -75,7 +75,7 @@ def get_user_list():
 
 def list_users(request):
     user_list = get_user_list()
-    paginator = Paginator(user_list, 10)  # 10 utilisateurs par page
+    paginator = Paginator(user_list, 100)  # 100 utilisateurs par page
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
     context = {

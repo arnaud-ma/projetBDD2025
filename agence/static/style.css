@@ -2,11 +2,40 @@
 /*                                    Base                                    */
 /* -------------------------------------------------------------------------- */
 
+.wrapper {
+    flex: 1 0 auto;
+    padding-bottom: 60px;
+    /* espace réservé pour ne pas que le contenu passe sous le footer */
+}
+
+footer {
+    flex-shrink: 0;
+    text-align: center;
+    padding: 10px;
+    background-color: #333;
+    color: white;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 60px;
+    /* fixe la hauteur du footer */
+    box-sizing: border-box;
+}
+
 body {
+    height: 100%;
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
     background-color: #f9f9f9;
+    display: flex;
+    flex-direction: column;
+}
+
+.wrapper {
+    flex: 1 0 auto;
+    padding-bottom: 60px;
+    /* espace réservé pour ne pas que le contenu passe sous le footer */
 }
 
 header {
@@ -43,6 +72,7 @@ main {
 }
 
 footer {
+    flex-shrink: 0;
     text-align: center;
     padding: 10px;
     background-color: #333;
@@ -50,6 +80,8 @@ footer {
     position: fixed;
     bottom: 0;
     width: 100%;
+    height: 60px;
+    box-sizing: border-box;
 }
 
 h1 {
