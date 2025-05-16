@@ -108,7 +108,6 @@ def create_user_accueil(request):
         {"accueil": True, "user_forms": UTILISATEURS_FORMS, "type_utilisateur": "utilisateur"},
     )
 
-
 def create_user(request, type_utilisateur: str = "utilisateur"):
     user_form1_obj = UtilisateurForm
     user_form2_obj = UTILISATEURS_FORMS.get(type_utilisateur)
@@ -126,6 +125,12 @@ def create_user(request, type_utilisateur: str = "utilisateur"):
         if form1.is_valid() and form2.is_valid():
             try:
                 with transaction.atomic():
+                    utilisateur = form1.save(commit=False)
+
+                    # Si nouvel utilisateur, je fixe le type_utilisateur
+                    if utilisateur.pk is None:
+                        utilisateur.type_utilisateur = type_utilisateur
+                        utilisateur.save()
                     utilisateur = form1.save(commit=False)
 
                     # Si nouvel utilisateur, je fixe le type_utilisateur
@@ -151,6 +156,7 @@ def create_user(request, type_utilisateur: str = "utilisateur"):
                         utilisateur.save()
 
                     #  je Crée l'instance liée au rôle spécifique (acheteur, vendeur, agent)
+                    #  je Crée l'instance liée au rôle spécifique (acheteur, vendeur, agent)
                     instance = form2.save(commit=False)
                     instance.utilisateur = utilisateur
                     instance.save()
@@ -160,11 +166,15 @@ def create_user(request, type_utilisateur: str = "utilisateur"):
 
             except ValidationError as ve:
                 messages.error(request, f"⚠️ {ve.message}")
+
+            except ValidationError as ve:
+                messages.error(request, f"⚠️ {ve.message}")
             except Exception as e:
                 messages.error(request, f"⚠️ Une erreur est survenue : {e!s}")
                 messages.error(request, f"⚠️ Une erreur est survenue : {e!s}")
         else:
             messages.error(request, "⚠️ Veuillez corriger les erreurs ci-dessous.")
+
 
     else:
         form1 = user_form1_obj()
@@ -181,6 +191,9 @@ def create_user(request, type_utilisateur: str = "utilisateur"):
             "accueil": False,
         },
     )
+
+
+
 
 
 # ---------------------------------------------------------------------------- #
