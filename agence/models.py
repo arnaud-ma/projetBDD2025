@@ -217,7 +217,17 @@ class Utilisateur(models.Model):
             coords_str = f" ({coords_str})"
 
         return f"{self.prenom} {self.nom} {coords_str}"
+    
 
+    def get_roles(self):
+        roles = []
+        if hasattr(self, "acheteur"):
+           roles.append("acheteur")
+        if hasattr(self, "vendeur"):
+           roles.append("vendeur")
+        if hasattr(self, "agent"):
+           roles.append("agent")
+        return roles
 
 class ProxyUtilisateur:
     """Classe proxy pour Utilisateur."""

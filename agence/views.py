@@ -2,16 +2,16 @@ from typing import NamedTuple
 from django.db import transaction
 import requests
 from dal import autocomplete
-from django.contrib import messages  # <- Ajouté
+from django.contrib import messages  
 from django.core.exceptions import BadRequest
 from django.db import connection
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render
 from agence.forms import UTILISATEURS_FORMS, AgenceForm, UtilisateurForm
-
+from django.core.exceptions import ValidationError
 from .models import Adresse, Agence, Utilisateur
-
+from . import models
 
 def index(request):
     return render(request, "agence/index.html")
@@ -88,6 +88,12 @@ def create_user_accueil(request):
 
 
 
+
+
+
+
+from django.http import HttpResponseBadRequest
+
 def create_user(request, type_utilisateur: str = "utilisateur"):
     user_form1_obj = UtilisateurForm
     user_form2_obj = UTILISATEURS_FORMS.get(type_utilisateur)
@@ -95,35 +101,55 @@ def create_user(request, type_utilisateur: str = "utilisateur"):
         return BadRequest("Type d'utilisateur invalide.")
 
     if request.method == "POST":
-        form1 = user_form1_obj(request.POST)
+        # On cherche d'abord un utilisateur existant avec cet email
+        utilisateur = models.Utilisateur.objects.filter(email=request.POST.get('email')).first()
+
+        # On crée le formulaire utilisateur en passant l'instance si existante
+        form1 = user_form1_obj(request.POST, instance=utilisateur)
         form2 = user_form2_obj(request.POST)
 
         if form1.is_valid() and form2.is_valid():
             try:
                 with transaction.atomic():
-                    # Recherche si l'utilisateur existe déjà
-                    utilisateur = Utilisateur.objects.filter(email=form1.cleaned_data['email']).first()
-                    if utilisateur is None:
-                        utilisateur = form1.save(commit=False)  # Créer un nouvel utilisateur si inexistant
+                    utilisateur = form1.save(commit=False)
+
+                    # Si nouvel utilisateur, on fixe le type_utilisateur
+                    if utilisateur.pk is None:
+                        utilisateur.type_utilisateur = type_utilisateur
+                        utilisateur.save()
                     else:
-                        # Si l'utilisateur existe déjà, on met à jour le formulaire avec l'utilisateur existant
-                        form1 = UtilisateurForm(instance=utilisateur)
+                        # L'utilisateur existe déjà, vérifier s'il a déjà ce rôle
+                        role_exists = False
+                        if type_utilisateur == "acheteur" and hasattr(utilisateur, "acheteur"):
+                            role_exists = True
+                        elif type_utilisateur == "vendeur" and hasattr(utilisateur, "vendeur"):
+                            role_exists = True
+                        elif type_utilisateur == "agent" and hasattr(utilisateur, "agent"):
+                            role_exists = True
 
-                    # S'assurer que le type_utilisateur est bien attribué
-                    utilisateur.type_utilisateur = type_utilisateur
-                    utilisateur.save()
+                        if role_exists:
+                            raise ValidationError(f"Cet utilisateur est déjà {type_utilisateur}.")
 
-                    # Créer l'instance spécifique (par exemple, Acheteur, Vendeur) et l'associer à l'utilisateur
+                        # Sinon, on peut mettre à jour type_utilisateur si besoin
+                        utilisateur.type_utilisateur = type_utilisateur
+                        utilisateur.save()
+
+                    # Créer l'instance liée au rôle spécifique (acheteur, vendeur, agent)
                     instance = form2.save(commit=False)
                     instance.utilisateur = utilisateur
                     instance.save()
 
                 messages.success(request, "✅ Utilisateur créé avec succès !")
                 return render(request, "agence/create_user.html", {"form_utilisateur": UtilisateurForm()})
+
+            except ValidationError as ve:
+                messages.error(request, f"⚠️ {ve.message}")
             except Exception as e:
                 messages.error(request, f"⚠️ Une erreur est survenue : {str(e)}")
+
         else:
             messages.error(request, "⚠️ Veuillez corriger les erreurs ci-dessous.")
+
     else:
         form1 = user_form1_obj()
         form2 = user_form2_obj()
@@ -139,6 +165,9 @@ def create_user(request, type_utilisateur: str = "utilisateur"):
             "accueil": False,
         },
     )
+
+
+
 
 
 # ---------------------------------------------------------------------------- #
