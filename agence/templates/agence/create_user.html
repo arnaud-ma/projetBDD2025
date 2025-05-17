@@ -22,7 +22,7 @@
       <div class="container">
         <form method="post">
           {% csrf_token %}
-          <input type="hidden" name="role" value="{{ label }}"> <!-- On envoie le role pour savoir quel formulaire on doit traiter -->
+          <input type="hidden" name="role" value="{{ label.lower }}"> <!-- On envoie le role pour savoir quel formulaire on doit traiter -->
           {% include 'agence/_form_fields.html' with form=role_form %}
 
 

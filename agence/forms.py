@@ -125,16 +125,16 @@ class AcheteurForm(forms.ModelForm):
     # dans celui-ci sans avoir rien à faire autre part, comme si c'était qu'un
     # seul formulaire
 
-    def __init__(self, *args, **kwargs):
-        data = kwargs.get("data", None)
+    def __init__(self, data=None, *args, **kwargs):
+        # data = kwargs.get("data", None)
         instance = kwargs.get("instance", None)
-        self.infos_bien_instance = instance
-        super().__init__(*args, **kwargs)
+        super().__init__(data, *args, **kwargs)
 
+        self.infos_bien_instance = instance
         self.infos_bien_form = InfosBienForm(
             data=data,
             instance=self.infos_bien_instance,
-            prefix=None,  # sans prefix
+            prefix=self.prefix,
         )
 
         # on met à jour les champs du formulaire principal avec ceux de infos_bien_form
@@ -147,21 +147,21 @@ class AcheteurForm(forms.ModelForm):
         """
         On vérifie la validité du formulaire principal et de infos_bien_form
         """
-        return super().is_valid() and self.infos_bien_form.is_valid()
+        parent_valid = super().is_valid()
+        infos_bien_valid = self.infos_bien_form.is_valid()
+        if not infos_bien_valid:
+            for field, errors in self.infos_bien_form.errors.items():
+                field_ = field if field in self.fields else None
+                for error in errors:
+                    self.add_error(field_, error)
+        return parent_valid and infos_bien_valid
 
     def save(self, commit=True):  # noqa: FBT002
+        infos_bien = self.infos_bien_form.save(commit=False)
         acheteur = super().save(commit=False)
-        infos_bien_data = {
-            name: self.cleaned_data[name]
-            for name in self.infos_bien_form.fields.keys()
-            if name in self.cleaned_data
-        }
-
-        infos_bien_form = InfosBienForm(infos_bien_data, instance=self.infos_bien_instance)
-        infos_bien = infos_bien_form.save(commit=False)
         acheteur.critere_recherche = infos_bien
         if commit:
-            infos_bien_form.save()
+            infos_bien.save()
             acheteur.save()
         return acheteur
 

@@ -59,7 +59,6 @@ class Adresse(models.Model):
             )
             response.raise_for_status()
             result = response.json()
-            print(result)
         except (requests.RequestException, ValueError) as e:
             msg = "Adresse introuvable ou API inaccessible"
             raise ValueError(msg) from e
@@ -158,6 +157,7 @@ class InfosBien(models.Model):
         decimal_places=2,
         default_currency="EUR",  # type: ignore
         blank=True,
+        null=True,
     )
 
     def __str__(self):

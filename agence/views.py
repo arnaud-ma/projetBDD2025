@@ -74,7 +74,7 @@ def get_user_list():
     # SQL Server, PostrgreSQL -> STRING_AGG
     query = """
         SELECT
-            utilisateur_id,
+            agence_utilisateur.id AS utilisateur_id,
             email,
             telephone,
             nom,
@@ -131,7 +131,7 @@ class CreateUserView(View):
         form = UtilisateurForm(request.POST)
         role_forms = self.init_role_forms()
         if form.is_valid():
-            form.save()
+            form.save(commit=True)
             messages.success(request, "✅ Utilisateur créé avec succès !")
             return redirect(request.path)
         else:
@@ -141,15 +141,14 @@ class CreateUserView(View):
     def handle_role_submission(self, request):
         utilisateur_form = UtilisateurForm()
         role_forms = self.init_role_forms()
-        submitted_form_type = request.POST.get("form_type", None)
-        for label, form_class in UTILISATEURS_FORMS.items():
-            prefix = label.lower()
-            if prefix == submitted_form_type:
-                form = form_class(request.POST, prefix=prefix)
-            else:
-                form = form_class(prefix=prefix)  # vide
-            role_forms[label] = form
-        form = role_forms.get(submitted_form_type, None)
+        submitted_form_type = request.POST.get("role", None)
+
+        form_get = role_forms.get(submitted_form_type, None)
+        if form_get is None:
+            msg = f"Le type de formulaire '{submitted_form_type}' n'est pas valide."
+            raise BadRequest(msg)
+
+        form = form_get.__class__(request.POST, prefix=submitted_form_type)
         if form and form.is_valid():
             email = form.cleaned_data.get("email")
             utilisateur = get_or_none(Utilisateur, email=email)
@@ -159,10 +158,10 @@ class CreateUserView(View):
 
             instance = form.save(commit=False)
             instance.utilisateur = utilisateur
+            instance.critere_recherche.save()
             instance.save()
             messages.success(request, f"✅ {submitted_form_type} créé avec succès !")
             return redirect(request.path)
-            role_forms[label] = form
         messages.error(request, "⚠️ Veuillez corriger les erreurs spécifiques.")
         return self.render_page(request, utilisateur_form, role_forms)
 
