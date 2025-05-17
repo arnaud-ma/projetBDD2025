@@ -268,6 +268,17 @@ class EmailAutocomplete(autocomplete.Select2ListView):
 #                                Profil Acheteur                               #
 # ---------------------------------------------------------------------------- #
 
+def get_proposition_biens(acheteur):
+    """
+    Retourne les biens qui correspondent aux critères de recherche de l'acheteur.
+    """
+    if not acheteur.critere_recherche:
+        return []
+
+    # On utilise les critères de recherche pour filtrer les biens
+    biens = acheteur.critere_recherche.bien_set.all()
+    return biens
+
 
 def profil_acheteur(request, utilisateur_id):
     context: dict = {"acheteur": None, "utilisateur": None}

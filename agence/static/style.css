@@ -218,3 +218,84 @@ h1 {
     background-color: #388E3C;
     /* un vert plus foncé pour la page active */
 }
+
+/* -------------------------------------------------------------------------- */
+/*                              Profil Acheteur                               */
+/* -------------------------------------------------------------------------- */
+
+.profil_acheteur {
+    width: 90%;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.profil_acheteur .case_achat {
+    position: relative;
+    background-color: white;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    transition: transform 0.2s ease;
+}
+
+.profil_acheteur .case_achat:hover {
+    transform: scale(1.01);
+}
+
+.case_achat h3 {
+    margin-top: 0;
+    color: #4CAF50;
+    font-size: 20px;
+}
+
+.case_achat .details_achat {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 15px;
+}
+
+.case_achat .etat_etape {
+    margin-top: 12px;
+    font-weight: bold;
+    color: #333;
+    background-color: #f0f0f0;
+    padding: 6px 10px;
+    border-left: 4px solid #4CAF50;
+    border-radius: 4px;
+}
+
+.case_achat {
+    background-color: white;
+    max-width: 700px;
+    margin: 2em auto;
+    padding: 15px 20px;
+    border: 1px solid #d0d0d0;
+    border-radius: 8px;
+    box-shadow: rgba(9, 30, 66, 0.15) 0px 1px 4px,
+        rgba(9, 30, 66, 0.1) 0px 0px 1px 1px;
+}
+
+.case_achat h4 {
+    margin-top: 0;
+    font-size: 1.1em;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 4px;
+    margin-bottom: 0.5em;
+    color: #2c3e50;
+}
+
+.bloc_bien,
+.bloc_admin {
+    margin-bottom: 1.5em;
+}
+
+.bloc_bien div,
+.bloc_admin div {
+    margin-bottom: 0.3em;
+}

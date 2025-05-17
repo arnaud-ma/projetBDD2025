@@ -124,7 +124,7 @@ class Adresse(models.Model):
             with transaction.atomic():
                 self.label = label
                 self.save(update_fields=["label"])
-        return self.label
+        return label
 
 
 class Agence(models.Model):

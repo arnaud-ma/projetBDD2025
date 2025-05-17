@@ -5,17 +5,70 @@
 
 {% block content %}
   <div class="profil_acheteur">
-  <h1>Profil de l'acheteur {{ user.nom }} {{ user.prenom }}</h1>
+    <h1>Profil de l'acheteur {{ acheteur.utilisateur.nom }} {{ acheteur.utilisateur.prenom }}</h1>
 
-  <h2>Achats en cours</h2>
-  <ul>
+    <h2>Achats en cours</h2>
+
     {% for fait_achat in faits_achat %}
-      <li>
-        {{ fait_achat }}
-      </li>
+      <div class="case_achat">
+        <!-- Bloc 1 : Infos sur le bien -->
+        <div class="bloc_bien">
+          <h4>🏠 Informations sur le bien</h4>
+          {% with info=fait_achat.bien.infos_bien %}
+            {% if info %}
+              <div>
+                <strong>Adresse :</strong> {{ info.lieu.label }}
+              </div>
+              {% if info.description %}
+                <div>
+                  <strong>Description :</strong> {{ info.description }}
+                </div>
+              {% endif %}
+              <div>
+                <strong>Chambres :</strong> {{ info.nb_chambres|default:'NC' }}
+              </div>
+              <div>
+                <strong>Salles de bain :</strong> {{ info.nb_salles_bain|default:'NC' }}
+              </div>
+              <div>
+                <strong>Surface habitable :</strong> {{ info.surface_habitable|default:'NC' }} m²
+              </div>
+              <div>
+                <strong>Surface terrain :</strong> {{ info.surface_terrain|default:'NC' }} m²
+              </div>
+              <div>
+                <strong>Prix :</strong>
+                {% if info.prix %}
+                  {{ info.prix }}
+                {% else %}
+                  Non renseigné
+                {% endif %}
+              </div>
+            {% else %}
+              <div>Aucune information renseignée.</div>
+            {% endif %}
+          {% endwith %}
+        </div>
+
+        <!-- Bloc 2 : Infos administratives -->
+        <div class="bloc_admin">
+          <h4>📄 Suivi et acteurs</h4>
+          <div>
+            <strong>Vendeur :</strong> {{ fait_achat.bien.vendeur }}
+          </div>
+          <div>
+            <strong>Agent :</strong> {{ fait_achat.bien.agent|default:'Non assigné' }}
+          </div>
+          <div>
+            <strong>État du bien :</strong> {{ fait_achat.bien.get_etat_display }}
+          </div>
+          <div>
+            <strong>Étape d'achat :</strong> {{ fait_achat.get_etape_achat_display }}
+          </div>
+        </div>
+      </div>
     {% empty %}
-      <li>Aucun achat en cours.</li>
+      <p>Aucun achat en cours.</p>
     {% endfor %}
-  </ul>
   </div>
 {% endblock %}
