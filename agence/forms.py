@@ -1,4 +1,5 @@
 from typing import ClassVar
+
 from bidict import bidict
 from dal import autocomplete
 from django import forms
@@ -9,6 +10,7 @@ from agence.models import Agent, Utilisateur
 
 from . import models
 from .models import Bien
+
 
 def get_or_none(classmodel, **kwargs):
     try:
@@ -58,6 +60,7 @@ class InfosBienForm(forms.ModelForm):
             "prix": forms.NumberInput(attrs={"min": 0}),
             # "description": forms.Textarea(attrs={"rows": 4}),
         }
+
 
 class BienForm(forms.ModelForm):
     class Meta:
