@@ -1,5 +1,4 @@
 from typing import ClassVar
-
 from bidict import bidict
 from dal import autocomplete
 from django import forms
@@ -9,7 +8,7 @@ from phonenumber_field.widgets import RegionalPhoneNumberWidget
 from agence.models import Agent, Utilisateur
 
 from . import models
-
+from .models import Bien
 
 def get_or_none(classmodel, **kwargs):
     try:
@@ -58,6 +57,17 @@ class InfosBienForm(forms.ModelForm):
             "lieu": autocomplete.ListSelect2(url="adresse-autocomplete"),
             "prix": forms.NumberInput(attrs={"min": 0}),
             # "description": forms.Textarea(attrs={"rows": 4}),
+        }
+
+class BienForm(forms.ModelForm):
+    class Meta:
+        model = Bien
+        fields = ['etat', 'infos_bien', 'vendeur', 'agent']
+        widgets = {
+            'etat': forms.Select(attrs={'class': 'form-control'}),
+            'infos_bien': forms.Select(attrs={'class': 'form-control'}),
+            'vendeur': forms.Select(attrs={'class': 'form-control'}),
+            'agent': forms.Select(attrs={'class': 'form-control'}),
         }
 
 

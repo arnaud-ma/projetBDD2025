@@ -1,5 +1,4 @@
 from typing import NamedTuple
-
 import requests
 from dal import autocomplete
 from django.contrib import messages
@@ -9,6 +8,10 @@ from django.db import connection, transaction
 from django.forms import ValidationError
 from django.shortcuts import redirect, render
 from django.views import View
+
+from django.shortcuts import render, redirect
+from .forms import BienForm
+
 
 from agence.forms import (
     UTILISATEURS_FORMS,
@@ -302,3 +305,18 @@ def profil_acheteur(request, utilisateur_id):
         "agence/profil_acheteur.html",
         context,
     )
+
+#---------------------------------------------------#
+#               BIEN                                #
+#---------------------------------------------------#
+
+def create_bien(request):
+    if request.method == 'POST':
+        form = BienForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('/agence/')  # Ou une page de confirmation
+    else:
+        form = BienForm()
+
+    return render(request, 'agence/create_bien.html', {'form': form})

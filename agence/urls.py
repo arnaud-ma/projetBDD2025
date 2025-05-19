@@ -12,6 +12,8 @@ urlpatterns = [
     path("create_agence/", views.create_agence, name="create_agence"),
     # ---------------------------------- Profils --------------------------------- #
     path("acheteur/<int:utilisateur_id>/", views.profil_acheteur, name="profil_acheteur"),
+    #-----------------------------------Bien---------------------------------------#
+    path('create_bien/', views.create_bien, name='create_bien'),
     # ----------------------------------- Utils ---------------------------------- #
     path(
         "adresse-autocomplete/",
