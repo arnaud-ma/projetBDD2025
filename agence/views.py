@@ -13,6 +13,9 @@ from django.shortcuts import render, redirect
 from .forms import BienForm
 
 
+from django.shortcuts import render, redirect
+from .forms import BienForm
+
 from agence.forms import (
     UTILISATEURS_FORMS,
     AgenceForm,
@@ -305,3 +308,19 @@ def profil_acheteur(request, utilisateur_id):
         "agence/profil_acheteur.html",
         context,
     )
+
+# ---------------------------------------------------#
+#               BIEN                                #
+# ---------------------------------------------------#
+
+
+def create_bien(request):
+    if request.method == "POST":
+        form = BienForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("/agence/")  # Ou une page de confirmation
+    else:
+        form = BienForm()
+
+    return render(request, "agence/create_bien.html", {"form": form})
