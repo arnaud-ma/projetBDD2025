@@ -1,0 +1,15 @@
+{% extends 'agence/base.html' %}
+
+{% block title %}Liste des biens pour l'agent {{ agent.utilisateur.nom }} {{ agent.utilisateur.prenom }} {% endblock %}
+
+{% block content %}
+
+<ul>
+    {% for bien in biens %}
+    <li> {{ bien }} </li>
+    {% empty %}
+    <li>Aucun bien trouvé pour cet agent.</li>
+    {% endfor %}
+</ul>
+
+{% endblock %}

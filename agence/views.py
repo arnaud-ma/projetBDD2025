@@ -1,4 +1,5 @@
 from typing import NamedTuple
+
 import requests
 from dal import autocomplete
 from django.contrib import messages
@@ -9,13 +10,7 @@ from django.forms import ValidationError
 from django.shortcuts import redirect, render
 from django.views import View
 
-from django.shortcuts import render, redirect
-from .forms import BienForm
-
-
-from django.shortcuts import render, redirect
-from .forms import BienForm
-
+from agence import models
 from agence.forms import (
     UTILISATEURS_FORMS,
     AgenceForm,
@@ -24,7 +19,8 @@ from agence.forms import (
     empty_utilisateur_forms,
 )
 
-from .models import Acheteur, FaitAchat, Utilisateur
+from .forms import BienForm
+from .models import Acheteur, Agent, FaitAchat, Utilisateur
 
 # ---------------------------------------------------------------------------- #
 #                                     Utils                                    #
@@ -164,7 +160,8 @@ class CreateUserView(View):
 
             instance = form.save(commit=False)
             instance.utilisateur = utilisateur
-            instance.critere_recherche.save()
+            if submitted_form_type == "acheteur":
+                instance.critere_recherche.save()
             instance.save()
             messages.success(request, f"✅ {submitted_form_type} créé avec succès !")
             return redirect(request.path)
@@ -324,3 +321,29 @@ def create_bien(request):
         form = BienForm()
 
     return render(request, "agence/create_bien.html", {"form": form})
+
+
+def profil_agent(request, utilisateur_id):
+    context: dict = {"agent": None, "utilisateur": None}
+    utilisateur = get_or_none(Utilisateur, id=utilisateur_id)
+    if utilisateur is None:
+        messages.error(request, "⚠️ Utilisateur non trouvé.")
+        return render(request, "agence/profil_agent.html", context)
+    context["utilisateur"] = utilisateur
+
+    agent = get_or_none(Agent, utilisateur=utilisateur)
+    if agent is None:
+        messages.error(request, "⚠️ Agent non trouvé pour cet utilisateur.")
+        return render(
+            request, "agence/profil_agent.html", {"agent": None, "utilisateur": utilisateur}
+        )
+    context["agent"] = agent
+    biens = models.Bien.objects.filter(agent=agent)
+    context["biens"] = biens
+    # fait_achats = FaitAchat.objects.filter(agent=agent).()
+    messages.success(request, "✅ Profil agent chargé avec succès.")
+    return render(
+        request,
+        "agence/profil_agent.html",
+        context,
+    )
