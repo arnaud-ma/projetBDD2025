@@ -67,7 +67,7 @@ Les options disponibles sont :
 - [X] Script pour peupler la base de données aléatoirement.
 - [X] formulaire pour créer une nouvelle agence (**Arnaud**)
 - [X] Adoucir la contrainte unique sur le numéro de téléphone pour inclure le null (**Arnaud**)
-- [X] ajouter création d'un agent dans formulaire pour créer utilsisateur (**Arnaud**)
+- [X] ajouter création d'un agent dans formulaire pour créer utilisateur (**Arnaud**)
 - [X] Ne plus avoir d'erreur quand un utilisateur déjà vendeur veut s'inscrire en tant qu'acheteur (**Prosper**)
 - [X] Critère de recherche pour les acheteurs (**Prosper**)
 - [ ] Formulaire pour créer un bien (**Prosper**)
