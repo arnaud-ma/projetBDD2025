@@ -72,7 +72,7 @@ Les options disponibles sont :
 - [X] Critère de recherche pour les acheteurs (**Prosper**)
 - [ ] Formulaire pour créer un bien (**Prosper**)
 - [ ] Liste des biens à proximité du critère de recherche de l'acheteur (ne pas forcément exclure les biens qui correspondent pas exactement à tous les critères) (**Arnaud**)
-- [ ] Suivre les biens communiqués, refusés, acceptés / retours des acheteurs / étapes d'achatt  -> via table fait_achat. Voir pour des novuelles colonnes dans fait_echat (**Arnaud**)
+- [ ] Suivre les biens communiqués, refusés, acceptés / retours des acheteurs / étapes d'achat  -> via table fait_achat. Voir pour des nouvelles colonnes dans fait_achat (**Arnaud**)
 - [ ] Portefeuille vendeur
 - [ ] Portefeuille acheteur
 - [ ] Bonus...
