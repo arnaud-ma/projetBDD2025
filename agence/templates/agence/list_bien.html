@@ -1,0 +1,15 @@
+<!-- agence/templates/agence/list_biens.html -->
+{% extends "base.html" %}
+
+{% block title %}Liste des biens{% endblock %}
+
+{% block content %}
+  <h1>Liste des biens</h1>
+  <ul>
+    {% for bien in biens %}
+      <li>{{ bien }}</li>
+    {% empty %}
+      <li>Aucun bien enregistré.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block title %}Modifier l’état du bien{% endblock %}
+
+{% block content %}
+  <h2>Modifier l’état du bien</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Enregistrer</button>
+  </form>
+  <a href="{% url 'biens' %}">Retour à la liste</a>
+{% endblock %}

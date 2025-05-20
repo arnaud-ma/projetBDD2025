@@ -9,7 +9,11 @@ from django.db import connection, transaction
 from django.forms import ValidationError
 from django.shortcuts import redirect, render
 from django.views import View
-
+from django.views.generic.edit import UpdateView
+from django.urls import reverse_lazy
+from .models import Bien
+from django.views.generic import ListView
+from .models import RendezVous, Vendeur
 from agence import models
 from agence.forms import (
     UTILISATEURS_FORMS,
@@ -347,3 +351,32 @@ def profil_agent(request, utilisateur_id):
         "agence/profil_agent.html",
         context,
     )
+class UpdateEtatBienView(UpdateView):
+    model = Bien
+    fields = ['etat']
+    template_name = 'bien/update_etat.html'  # Ce template sera à créer
+
+    def get_success_url(self):
+        return reverse_lazy('list_biens')
+    
+class ListViewBiens(ListView):
+    model = Bien
+    template_name = "agence/list_biens.html"  # à adapter selon l'emplacement de ton template
+    context_object_name = "biens"
+
+# ---------------------------------------------------#
+#            RDV_Vendeur                             #
+# ---------------------------------------------------#
+class RendezVousParVendeurView(ListView):
+    model = RendezVous
+    template_name = "agence/rendezvous_vendeur.html"
+    context_object_name = "rendezvous_list"
+
+    def get_queryset(self):
+        vendeur_id = self.kwargs['vendeur_id']
+        return RendezVous.objects.filter(fait_achat__bien__vendeur__id=vendeur_id)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["vendeur"] = Vendeur.objects.get(id=self.kwargs['vendeur_id'])
+        return context
