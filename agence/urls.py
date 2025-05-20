@@ -1,8 +1,8 @@
 from django.urls import path
-from .views import UpdateEtatBienView
+
 from . import views
-from .views import ListViewBiens
-from .views import RendezVousParVendeurView
+from .views import ListViewBiens, RendezVousParVendeurView, UpdateEtatBienView
+
 urlpatterns = [
     path("", views.index, name="index"),
     # -------------------------------- Utilisateur ------------------------------- #
@@ -19,12 +19,15 @@ urlpatterns = [
     path("agent/<int:utilisateur_id>/", views.profil_agent, name="profil_agent"),
     # path("agent/", views.list_agents, name="list_agents"),
     # -----------------------------------LIste Bien--------------------------------------#
-    path('biens/', ListViewBiens.as_view(), name='list_biens'),
-    #--------------------------------RDV_vendeur----------------------------------------#
-    path('vendeur/<int:vendeur_id>/rendezvous/', RendezVousParVendeurView.as_view(), name='rendezvous_par_vendeur'),
-
+    path("biens/", ListViewBiens.as_view(), name="list_biens"),
+    # --------------------------------RDV_vendeur----------------------------------------#
+    path(
+        "vendeur/<int:vendeur_id>/rendezvous/",
+        RendezVousParVendeurView.as_view(),
+        name="rendezvous_par_vendeur",
+    ),
     # ----------------------------------- Utils ---------------------------------- #
-    path('bien/<int:pk>/etat/', UpdateEtatBienView.as_view(), name='update_etat_bien'),
+    path("bien/<int:pk>/etat/", UpdateEtatBienView.as_view(), name="update_etat_bien"),
     path(
         "adresse-autocomplete/",
         views.AdresseAutocomplete.as_view(),

@@ -20,9 +20,8 @@ def get_or_none(classmodel, **kwargs):
 
 
 def email_autocomplete_field():
-    return forms.CharField(
-        label="Email", widget=autocomplete.ListSelect2(url="email-autocomplete")
-    )
+    return forms.CharField(label="Email", widget=autocomplete.ListSelect2(url="email-autocomplete"))
+
 
 # ---------------------------------------------------------------------------- #
 #                                     Bien                                     #
@@ -65,12 +64,12 @@ class InfosBienForm(forms.ModelForm):
 class BienForm(forms.ModelForm):
     class Meta:
         model = Bien
-        fields = ['etat', 'infos_bien', 'vendeur', 'agent']
+        fields = ["etat", "infos_bien", "vendeur", "agent"]
         widgets = {
-            'etat': forms.Select(attrs={'class': 'form-control'}),
-            'infos_bien': forms.Select(attrs={'class': 'form-control'}),
-            'vendeur': forms.Select(attrs={'class': 'form-control'}),
-            'agent': forms.Select(attrs={'class': 'form-control'}),
+            "etat": forms.Select(attrs={"class": "form-control"}),
+            "infos_bien": forms.Select(attrs={"class": "form-control"}),
+            "vendeur": forms.Select(attrs={"class": "form-control"}),
+            "agent": forms.Select(attrs={"class": "form-control"}),
         }
 
 
@@ -106,6 +105,7 @@ def empty_utilisateur_forms():
 
 class UtilisateurForm(forms.ModelForm):
     telephone = PhoneNumberField(required=False, widget=RegionalPhoneNumberWidget())
+
     class Meta:
         model = models.Utilisateur
         fields: ClassVar = [
@@ -129,6 +129,7 @@ class TypeUtilisateurForm(forms.Form):
 @enregistrer_utilisateur_form("Acheteur")
 class AcheteurForm(forms.ModelForm):
     email = email_autocomplete_field()
+
     class Meta:
         model = models.Acheteur
         # TODO: critere_recherche
@@ -182,6 +183,7 @@ class AcheteurForm(forms.ModelForm):
 @enregistrer_utilisateur_form("Vendeur")
 class VendeurForm(forms.ModelForm):
     email = email_autocomplete_field()
+
     class Meta:
         model = models.Vendeur
         fields: ClassVar = []
@@ -190,6 +192,7 @@ class VendeurForm(forms.ModelForm):
 @enregistrer_utilisateur_form("Agent")
 class AgentForm(forms.ModelForm):
     email = email_autocomplete_field()
+
     class Meta:
         model = models.Agent
         fields: ClassVar = ["agence"]
@@ -206,6 +209,7 @@ class AgentForm(forms.ModelForm):
             raise forms.ValidationError(msg)
         return self.email
 
+
 # ---------------------------------------------------------------------------- #
 #                                    Agence                                    #
 # ---------------------------------------------------------------------------- #
@@ -215,6 +219,7 @@ class AgenceForm(forms.ModelForm):
     adresse = forms.CharField(
         label="Adresse", widget=autocomplete.ListSelect2(url="adresse-autocomplete")
     )
+
     class Meta:
         model = models.Agence
         fields: ClassVar = ["nom", "telephone", "adresse"]

@@ -51,6 +51,7 @@ def index(request):
 #                                 Utilisateurs                                 #
 # ---------------------------------------------------------------------------- #
 
+
 class UserInfo(NamedTuple):
     id: int
     email: str
@@ -190,6 +191,7 @@ class CreateUserView(View):
             for label, form_class in UTILISATEURS_FORMS.items()
         }
 
+
 # ---------------------------------------------------------------------------- #
 #                                    Agence                                    #
 # ---------------------------------------------------------------------------- #
@@ -275,6 +277,7 @@ class EmailAutocomplete(autocomplete.Select2ListView):
 #                                Profil Acheteur                               #
 # ---------------------------------------------------------------------------- #
 
+
 def get_proposition_biens(acheteur):
     """
     Retourne les biens qui correspondent aux critères de recherche de l'acheteur.
@@ -309,6 +312,7 @@ def profil_acheteur(request, utilisateur_id):
         "agence/profil_acheteur.html",
         context,
     )
+
 
 # ---------------------------------------------------#
 #               BIEN                                #
@@ -351,18 +355,22 @@ def profil_agent(request, utilisateur_id):
         "agence/profil_agent.html",
         context,
     )
+
+
 class UpdateEtatBienView(UpdateView):
     model = Bien
-    fields = ['etat']
-    template_name = 'bien/update_etat.html'  # Ce template sera à créer
+    fields = ["etat"]
+    template_name = "bien/update_etat.html"  # Ce template sera à créer
 
     def get_success_url(self):
-        return reverse_lazy('list_biens')
-    
+        return reverse_lazy("list_biens")
+
+
 class ListViewBiens(ListView):
     model = Bien
     template_name = "agence/list_biens.html"  # à adapter selon l'emplacement de ton template
     context_object_name = "biens"
+
 
 # ---------------------------------------------------#
 #            RDV_Vendeur                             #
@@ -379,5 +387,14 @@ class RendezVousParVendeurView(ListView):
     # views.py
     def get_queryset(self):
         vendeur_id = self.kwargs["vendeur_id"]
+
         return RendezVous.objects.filter(fait_achat__bien__vendeur_id=vendeur_id)
+
+
+        return RendezVous.objects.filter(fait_achat__bien__vendeur__utilisateur=vendeur_id)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["vendeur"] = Vendeur.objects.get(utilisateur=self.kwargs["vendeur_id"])
+        return context
 
