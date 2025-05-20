@@ -358,7 +358,7 @@ class UpdateEtatBienView(UpdateView):
 
     def get_success_url(self):
         return reverse_lazy('list_biens')
-    
+
 class ListViewBiens(ListView):
     model = Bien
     template_name = "agence/list_biens.html"  # à adapter selon l'emplacement de ton template
@@ -374,9 +374,9 @@ class RendezVousParVendeurView(ListView):
 
     def get_queryset(self):
         vendeur_id = self.kwargs['vendeur_id']
-        return RendezVous.objects.filter(fait_achat__bien__vendeur__id=vendeur_id)
+        return RendezVous.objects.filter(fait_achat__bien__vendeur__utilisateur=vendeur_id)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["vendeur"] = Vendeur.objects.get(id=self.kwargs['vendeur_id'])
+        context["vendeur"] = Vendeur.objects.get(utilisateur=self.kwargs['vendeur_id'])
         return context

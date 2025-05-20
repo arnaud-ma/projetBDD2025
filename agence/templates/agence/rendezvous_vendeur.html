@@ -1,15 +1,17 @@
-{% extends "base.html" %}
+{% extends 'agence/base.html' %}
 
-{% block title %}Rendez-vous de {{ vendeur.nom }}{% endblock %}
+{% block title %}
+  Rendez-vous de {{ vendeur.utilisateur.nom }}
+{% endblock %}
 
 {% block content %}
-  <h2>Rendez-vous de {{ vendeur.nom }}</h2>
+  <h2>Rendez-vous du vendeur {{ vendeur.utilisateur.nom }}</h2>
   <ul>
     {% for rdv in rendezvous_list %}
       <li>
-        {{ rdv.date|date:"d/m/Y H:i" }} – {{ rdv.objet }}<br />
+        {{ rdv.date|date:'d/m/Y H:i' }} – {{ rdv.objet }}<br />
         Lieu : {{ rdv.lieu }}<br />
-        Commentaire : {{ rdv.commentaire|default:"Aucun" }}
+        Commentaire : {{ rdv.commentaire|default:'Aucun' }}
       </li>
     {% empty %}
       <li>Aucun rendez-vous prévu pour ce vendeur.</li>
