@@ -1,13 +1,6 @@
 {% extends 'agence/base.html' %}
 
-<<<<<<< HEAD
-{% block content %}
-  <h2>Rendez-vous du vendeur</h2>
-  <ul>
-    {% for rdv in rendezvous_list %}
-      <li>
-        {{ rdv.date }} - {{ rdv.objet }} - {{ rdv.lieu }}
-=======
+
 {% block title %}
   Rendez-vous de {{ vendeur.utilisateur.nom }}
 {% endblock %}
@@ -20,7 +13,6 @@
         {{ rdv.date|date:'d/m/Y H:i' }} – {{ rdv.objet }}<br />
         Lieu : {{ rdv.lieu }}<br />
         Commentaire : {{ rdv.commentaire|default:'Aucun' }}
->>>>>>> da15530ccff85b44cab12bd6469eb69232b6ac9c
       </li>
     {% empty %}
       <li>Aucun rendez-vous trouvé.</li>

@@ -386,9 +386,9 @@ class RendezVousParVendeurView(ListView):
     def get_queryset(self):
         vendeur_id = self.kwargs["vendeur_id"]
 
-        return RendezVous.objects.filter(fait_achat__bien__vendeur_id=vendeur_id)
-
-        return RendezVous.objects.filter(fait_achat__bien__vendeur__utilisateur=vendeur_id)
+        return RendezVous.objects.filter(
+            fait_achat__bien__vendeur__utilisateur=vendeur_id
+        ).order_by("-date")  # "-" devant date est ici pour dire décroissante
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
