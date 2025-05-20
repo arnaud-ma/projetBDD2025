@@ -367,16 +367,17 @@ class ListViewBiens(ListView):
 # ---------------------------------------------------#
 #            RDV_Vendeur                             #
 # ---------------------------------------------------#
+# views.py
+from django.views.generic import ListView
+from .models import RendezVous
+
 class RendezVousParVendeurView(ListView):
     model = RendezVous
     template_name = "agence/rendezvous_vendeur.html"
     context_object_name = "rendezvous_list"
 
+    # views.py
     def get_queryset(self):
-        vendeur_id = self.kwargs['vendeur_id']
-        return RendezVous.objects.filter(fait_achat__bien__vendeur__id=vendeur_id)
+        vendeur_id = self.kwargs["vendeur_id"]
+        return RendezVous.objects.filter(fait_achat__bien__vendeur_id=vendeur_id)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["vendeur"] = Vendeur.objects.get(id=self.kwargs['vendeur_id'])
-        return context
