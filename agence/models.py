@@ -277,7 +277,7 @@ class Agent(ProxyUtilisateur, models.Model):
 class FaitAchat(models.Model):
     bien = models.ForeignKey(Bien, models.CASCADE)
     acheteur = models.ForeignKey(Acheteur, models.CASCADE)
-    vendeur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
+
     class EtapeAchat(models.IntegerChoices):
         PROSPECTION = 1
         PROPOSITION = 2

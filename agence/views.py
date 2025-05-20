@@ -8,12 +8,11 @@ from django.core.paginator import Paginator
 from django.db import connection, transaction
 from django.forms import ValidationError
 from django.shortcuts import redirect, render
-from django.views import View
-from django.views.generic.edit import UpdateView
 from django.urls import reverse_lazy
-from .models import Bien
+from django.views import View
 from django.views.generic import ListView
-from .models import RendezVous, Vendeur
+from django.views.generic.edit import UpdateView
+
 from agence import models
 from agence.forms import (
     UTILISATEURS_FORMS,
@@ -24,7 +23,7 @@ from agence.forms import (
 )
 
 from .forms import BienForm
-from .models import Acheteur, Agent, FaitAchat, Utilisateur
+from .models import Acheteur, Agent, Bien, FaitAchat, RendezVous, Utilisateur, Vendeur
 
 # ---------------------------------------------------------------------------- #
 #                                     Utils                                    #
@@ -376,8 +375,7 @@ class ListViewBiens(ListView):
 #            RDV_Vendeur                             #
 # ---------------------------------------------------#
 # views.py
-from django.views.generic import ListView
-from .models import RendezVous
+
 
 class RendezVousParVendeurView(ListView):
     model = RendezVous
@@ -390,11 +388,9 @@ class RendezVousParVendeurView(ListView):
 
         return RendezVous.objects.filter(fait_achat__bien__vendeur_id=vendeur_id)
 
-
         return RendezVous.objects.filter(fait_achat__bien__vendeur__utilisateur=vendeur_id)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["vendeur"] = Vendeur.objects.get(utilisateur=self.kwargs["vendeur_id"])
         return context
-
