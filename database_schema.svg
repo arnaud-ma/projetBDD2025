@@ -203,10 +203,10 @@
 <text text-anchor="start" x="656.11" y="-733.1" font-family="Roboto" font-weight="bold" font-size="8.00">BigAutoField</text>
 <text text-anchor="start" x="715.11" y="-733.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
 <text text-anchor="start" x="536.11" y="-720.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
-<text text-anchor="start" x="550.11" y="-720.1" font-family="Roboto" font-weight="bold" font-size="8.00">lieu</text>
+<text text-anchor="start" x="550.11" y="-720.1" font-family="Roboto" font-weight="bold" font-size="8.00" fill="#7b7b7b">lieu</text>
 <text text-anchor="start" x="568.11" y="-720.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
 <text text-anchor="start" x="642.11" y="-720.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
-<text text-anchor="start" x="656.11" y="-720.1" font-family="Roboto" font-weight="bold" font-size="8.00">ForeignKey (id)</text>
+<text text-anchor="start" x="656.11" y="-720.1" font-family="Roboto" font-weight="bold" font-size="8.00" fill="#7b7b7b">ForeignKey (id)</text>
 <text text-anchor="start" x="727.11" y="-720.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
 <text text-anchor="start" x="536.11" y="-707.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
 <text text-anchor="start" x="550.11" y="-707.1" font-family="Roboto" font-size="8.00" fill="#7b7b7b">description</text>
@@ -215,40 +215,40 @@
 <text text-anchor="start" x="656.11" y="-707.1" font-family="Roboto" font-size="8.00" fill="#7b7b7b">TextField</text>
 <text text-anchor="start" x="691.11" y="-707.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
 <text text-anchor="start" x="536.11" y="-694.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
-<text text-anchor="start" x="550.11" y="-694.1" font-family="Roboto" font-size="8.00">nb_chambres</text>
+<text text-anchor="start" x="550.11" y="-694.1" font-family="Roboto" font-size="8.00" fill="#7b7b7b">nb_chambres</text>
 <text text-anchor="start" x="605.11" y="-694.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
 <text text-anchor="start" x="642.11" y="-694.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
-<text text-anchor="start" x="656.11" y="-694.1" font-family="Roboto" font-size="8.00">IntegerField</text>
+<text text-anchor="start" x="656.11" y="-694.1" font-family="Roboto" font-size="8.00" fill="#7b7b7b">IntegerField</text>
 <text text-anchor="start" x="705.11" y="-694.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
 <text text-anchor="start" x="536.11" y="-681.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
-<text text-anchor="start" x="550.11" y="-681.1" font-family="Roboto" font-size="8.00">nb_cuisines</text>
+<text text-anchor="start" x="550.11" y="-681.1" font-family="Roboto" font-size="8.00" fill="#7b7b7b">nb_cuisines</text>
 <text text-anchor="start" x="599.11" y="-681.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
 <text text-anchor="start" x="642.11" y="-681.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
-<text text-anchor="start" x="656.11" y="-681.1" font-family="Roboto" font-size="8.00">IntegerField</text>
+<text text-anchor="start" x="656.11" y="-681.1" font-family="Roboto" font-size="8.00" fill="#7b7b7b">IntegerField</text>
 <text text-anchor="start" x="705.11" y="-681.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
 <text text-anchor="start" x="536.11" y="-668.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
-<text text-anchor="start" x="550.11" y="-668.1" font-family="Roboto" font-size="8.00">nb_garages</text>
+<text text-anchor="start" x="550.11" y="-668.1" font-family="Roboto" font-size="8.00" fill="#7b7b7b">nb_garages</text>
 <text text-anchor="start" x="599.11" y="-668.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
 <text text-anchor="start" x="642.11" y="-668.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
-<text text-anchor="start" x="656.11" y="-668.1" font-family="Roboto" font-size="8.00">IntegerField</text>
+<text text-anchor="start" x="656.11" y="-668.1" font-family="Roboto" font-size="8.00" fill="#7b7b7b">IntegerField</text>
 <text text-anchor="start" x="705.11" y="-668.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
 <text text-anchor="start" x="536.11" y="-655.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
-<text text-anchor="start" x="550.11" y="-655.1" font-family="Roboto" font-size="8.00">nb_salles_bain</text>
+<text text-anchor="start" x="550.11" y="-655.1" font-family="Roboto" font-size="8.00" fill="#7b7b7b">nb_salles_bain</text>
 <text text-anchor="start" x="611.11" y="-655.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
 <text text-anchor="start" x="642.11" y="-655.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
-<text text-anchor="start" x="656.11" y="-655.1" font-family="Roboto" font-size="8.00">IntegerField</text>
+<text text-anchor="start" x="656.11" y="-655.1" font-family="Roboto" font-size="8.00" fill="#7b7b7b">IntegerField</text>
 <text text-anchor="start" x="705.11" y="-655.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
 <text text-anchor="start" x="536.11" y="-642.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
-<text text-anchor="start" x="550.11" y="-642.1" font-family="Roboto" font-size="8.00">nb_wc</text>
+<text text-anchor="start" x="550.11" y="-642.1" font-family="Roboto" font-size="8.00" fill="#7b7b7b">nb_wc</text>
 <text text-anchor="start" x="576.11" y="-642.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
 <text text-anchor="start" x="642.11" y="-642.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
-<text text-anchor="start" x="656.11" y="-642.1" font-family="Roboto" font-size="8.00">IntegerField</text>
+<text text-anchor="start" x="656.11" y="-642.1" font-family="Roboto" font-size="8.00" fill="#7b7b7b">IntegerField</text>
 <text text-anchor="start" x="705.11" y="-642.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
 <text text-anchor="start" x="536.11" y="-629.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
-<text text-anchor="start" x="550.11" y="-629.1" font-family="Roboto" font-size="8.00">prix</text>
+<text text-anchor="start" x="550.11" y="-629.1" font-family="Roboto" font-size="8.00" fill="#7b7b7b">prix</text>
 <text text-anchor="start" x="566.11" y="-629.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
 <text text-anchor="start" x="642.11" y="-629.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
-<text text-anchor="start" x="656.11" y="-629.1" font-family="Roboto" font-size="8.00">MoneyField</text>
+<text text-anchor="start" x="656.11" y="-629.1" font-family="Roboto" font-size="8.00" fill="#7b7b7b">MoneyField</text>
 <text text-anchor="start" x="702.11" y="-629.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
 <text text-anchor="start" x="536.11" y="-616.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
 <text text-anchor="start" x="550.11" y="-616.1" font-family="Roboto" font-size="8.00">prix_currency</text>
@@ -257,16 +257,16 @@
 <text text-anchor="start" x="656.11" y="-616.1" font-family="Roboto" font-size="8.00">CurrencyField</text>
 <text text-anchor="start" x="711.11" y="-616.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
 <text text-anchor="start" x="536.11" y="-603.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
-<text text-anchor="start" x="550.11" y="-603.1" font-family="Roboto" font-size="8.00">surface_habitable</text>
+<text text-anchor="start" x="550.11" y="-603.1" font-family="Roboto" font-size="8.00" fill="#7b7b7b">surface_habitable</text>
 <text text-anchor="start" x="624.11" y="-603.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
 <text text-anchor="start" x="642.11" y="-603.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
-<text text-anchor="start" x="656.11" y="-603.1" font-family="Roboto" font-size="8.00">FloatField</text>
+<text text-anchor="start" x="656.11" y="-603.1" font-family="Roboto" font-size="8.00" fill="#7b7b7b">FloatField</text>
 <text text-anchor="start" x="696.11" y="-603.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
 <text text-anchor="start" x="536.11" y="-590.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
-<text text-anchor="start" x="550.11" y="-590.1" font-family="Roboto" font-size="8.00">surface_terrain</text>
+<text text-anchor="start" x="550.11" y="-590.1" font-family="Roboto" font-size="8.00" fill="#7b7b7b">surface_terrain</text>
 <text text-anchor="start" x="612.11" y="-590.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
 <text text-anchor="start" x="642.11" y="-590.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
-<text text-anchor="start" x="656.11" y="-590.1" font-family="Roboto" font-size="8.00">FloatField</text>
+<text text-anchor="start" x="656.11" y="-590.1" font-family="Roboto" font-size="8.00" fill="#7b7b7b">FloatField</text>
 <text text-anchor="start" x="696.11" y="-590.1" font-family="Roboto" font-size="8.00"> &#160;&#160;&#160;&#160;&#160;</text>
 <polygon fill="none" stroke="black" points="532.61,-584 532.61,-763 743.61,-763 743.61,-584 532.61,-584"/>
 </g>
