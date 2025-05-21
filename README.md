@@ -70,7 +70,7 @@ Les options disponibles sont :
 - [X] ajouter création d'un agent dans formulaire pour créer utilisateur (**Arnaud**)
 - [X] Ne plus avoir d'erreur quand un utilisateur déjà vendeur veut s'inscrire en tant qu'acheteur (**Prosper**)
 - [X] Critère de recherche pour les acheteurs (**Prosper**)
-- [ ] Formulaire pour créer un bien (**Prosper**)
+- [X] Formulaire pour créer un bien (**Prosper**)
 - [ ] Liste des biens à proximité du critère de recherche de l'acheteur (ne pas forcément exclure les biens qui correspondent pas exactement à tous les critères) (**Arnaud**)
 - [ ] Suivre les biens communiqués, refusés, acceptés / retours des acheteurs / étapes d'achat  -> via table fait_achat. Voir pour des nouvelles colonnes dans fait_achat (**Arnaud**)
 - [ ] Portefeuille vendeur
