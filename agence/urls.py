@@ -13,19 +13,14 @@ urlpatterns = [
     path("create_agence/", views.create_agence, name="create_agence"),
     # ---------------------------------- Profils --------------------------------- #
     path("acheteur/<int:utilisateur_id>/", views.profil_acheteur, name="profil_acheteur"),
+    path("vendeur/<int:vendeur_id>/", views.ProfilVendeurView.as_view(), name="profil_vendeur"),
     # -----------------------------------Bien---------------------------------------#
     path("create_bien/", views.create_bien, name="create_bien"),
     # -----------------------------------Agent--------------------------------------#
     path("agent/<int:utilisateur_id>/", views.profil_agent, name="profil_agent"),
     # path("agent/", views.list_agents, name="list_agents"),
-    # -----------------------------------LIste Bien--------------------------------------#
-    path("biens/", ListViewBiens.as_view(), name="list_biens"),
-    # --------------------------------RDV_vendeur----------------------------------------#
-    path(
-        "vendeur/<int:vendeur_id>/rendezvous/",
-        RendezVousParVendeurView.as_view(),
-        name="rendezvous_par_vendeur",
-    ),
+    # # -----------------------------------LIste Bien--------------------------------------#
+    # path("biens/", ListViewBiens.as_view(), name="list_biens"),
     # ----------------------------------- Utils ---------------------------------- #
     path("bien/<int:pk>/etat/", UpdateEtatBienView.as_view(), name="update_etat_bien"),
     path(

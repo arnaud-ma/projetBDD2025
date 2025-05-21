@@ -1,3 +1,4 @@
+from math import atan2, cos, radians, sin, sqrt
 from typing import ClassVar
 
 import requests
@@ -5,12 +6,34 @@ from bidict import bidict
 from django.db import models, transaction
 from djmoney.models.fields import MoneyField
 from phonenumber_field.modelfields import PhoneNumberField
+from sklearn.metrics.pairwise import cosine_similarity
 
 # Create your models here.
 
 # ---------------------------------------------------------------------------- #
 #                              region localisation                             #
 # ---------------------------------------------------------------------------- #
+
+
+def haversine_distance(lat1, lon1, lat2, lon2):
+    """
+    Calcule la distance entre deux points géographiques en utilisant la formule de Haversine.
+    :param lat1: Latitude du premier point
+    :param lon1: Longitude du premier point
+    :param lat2: Latitude du deuxième point
+    :param lon2: Longitude du deuxième point
+    :return: Distance en kilomètres
+    """
+
+    R = 6371.0  # Rayon de la Terre en kilomètres
+
+    dlat = radians(lat2 - lat1)
+    dlon = radians(lon2 - lon1)
+
+    a = sin(dlat / 2) ** 2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2) ** 2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+    return R * c
 
 
 class Commune(models.Model):
@@ -168,6 +191,54 @@ class InfosBien(models.Model):
             f"{self.surface_terrain} m² terrain"
         )
 
+    def distance(self, autre: "InfosBien") -> float:
+        """
+        Calcule la distance entre deux biens en utilisant la distance de Haversine.
+        :param autre: L'autre bien.
+        :return: La distance en kilomètres.
+        """
+        return haversine_distance(
+            self.lieu.latitude,
+            self.lieu.longitude,
+            autre.lieu.latitude,
+            autre.lieu.longitude,
+        )
+
+    def score_correspondance(self, autre: "InfosBien") -> int:
+        """
+        Renvoie un score de correspondance entre le bien et les critères de recherche.
+        Plus le score est élevé, plus le bien correspond aux critères.
+
+        :param critere_recherche: Les critères de recherche.
+        :return: Le score de correspondance.
+        """
+        # On crée un vecteur de caractéristiques pour le bien
+        # et un autre pour les critères de recherche
+        bien_vector = [
+            self.nb_chambres,
+            self.nb_salles_bain,
+            self.nb_garages,
+            self.nb_cuisines,
+            self.nb_wc,
+            self.surface_habitable,
+            self.surface_terrain,
+        ]
+        critere_vector = [
+            autre.nb_chambres,
+            autre.nb_salles_bain,
+            autre.nb_garages,
+            autre.nb_cuisines,
+            autre.nb_wc,
+            autre.surface_habitable,
+            autre.surface_terrain,
+        ]
+
+        dist = self.distance(autre=autre)
+
+        # On calcule la similarité cosinus entre les deux vecteurs
+        score = cosine_similarity([bien_vector], [critere_vector])[0][0]
+        return int(score * 100) - int(dist / 1000)
+
 
 class Bien(models.Model):
     class Etat(models.TextChoices):
@@ -183,7 +254,8 @@ class Bien(models.Model):
     agent = models.ForeignKey("Agent", models.CASCADE, null=True)  # TODO: remove null=True
 
     def __str__(self):
-        attrs = {"vendeur": self.vendeur, "etat_bien": self.etat}
+        # get_etat_display() est une méthode de Django qui renvoie le nom lisible de l'état
+        attrs = {"vendeur": self.vendeur, "etat_bien": self.get_etat_display()}
         if self.infos_bien:
             attrs["infos_bien"] = self.infos_bien
         return ", ".join(f"{k}: {v}" for k, v in attrs.items()) + f" ({self.pk})"
@@ -224,7 +296,7 @@ class Utilisateur(models.Model):
 class ProxyUtilisateur:
     """Classe proxy pour Utilisateur."""
 
-    TYPE_UTILISATEURS: ClassVar[bidict] = bidict()
+    TYPE_UTILISATEURS: ClassVar[bidict[str, type["ProxyUtilisateur"]]] = bidict()
 
     def __init_subclass__(cls, *args, name=None, **kwargs):
         super().__init_subclass__(*args, **kwargs)
@@ -233,11 +305,6 @@ class ProxyUtilisateur:
             name = cls.__name__.lower()
         if cls is not ProxyUtilisateur and cls not in ProxyUtilisateur.TYPE_UTILISATEURS:
             ProxyUtilisateur.TYPE_UTILISATEURS[cls.__name__.lower()] = cls
-
-        # # On enregistre le type d'utilisateur dans la classe bidict
-        # if not hasattr(cls, "TYPE_UTILISATEURS"):
-        #     cls.TYPE_UTILISATEURS = bidict()
-        # cls.TYPE_UTILISATEURS[cls.__name__.lower()] = cls
 
     def __str__(self):
         coords = (self.utilisateur.email, self.utilisateur.telephone)  # récupérer les coordonnées
@@ -248,6 +315,21 @@ class ProxyUtilisateur:
             coords_str = f"({coords_str})"
 
         return f"{self.utilisateur.prenom} {self.utilisateur.nom} {coords_str}"
+
+    @classmethod
+    def url_cls(cls, id_):
+        class_name = cls.__name__.lower()
+        return f"/agence/{class_name}/{id_}/"
+
+    def url(self):
+        return self.url_cls(self.utilisateur.id)
+
+    @classmethod
+    def url_html_cls(cls, id_):
+        return f'<a href="{cls.url_cls(id_)}">{cls.__name__.lower()}</a>'
+
+    def url_html(self):
+        return f'<a href="{self.url()}">{self.__class__.__name__.lower()}</a>'
 
 
 class Vendeur(ProxyUtilisateur, models.Model):

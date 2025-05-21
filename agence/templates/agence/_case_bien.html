@@ -1,0 +1,88 @@
+<div class="case_bien">
+  <!-- Bloc 1 : Infos sur le bien -->
+  <div class="bloc_bien">
+    <h4>🏠 Informations sur le bien</h4>
+    {% with info=bien.infos_bien %}
+      {% if info %}
+        <div>
+          <strong>Adresse :</strong> {{ info.lieu.label }}
+        </div>
+        {% if info.description %}
+          <div>
+            <strong>Description :</strong> {{ info.description }}
+          </div>
+        {% endif %}
+        <div>
+          <strong>Chambres :</strong> {{ info.nb_chambres|default:'NC' }}
+        </div>
+        <div>
+          <strong>Salles de bain :</strong> {{ info.nb_salles_bain|default:'NC' }}
+        </div>
+        <div>
+          <strong>Surface habitable :</strong> {{ info.surface_habitable|default:'NC' }} m²
+        </div>
+        <div>
+          <strong>Surface terrain :</strong> {{ info.surface_terrain|default:'NC' }} m²
+        </div>
+        <div>
+          <strong>Prix :</strong>
+          {% if info.prix %}
+            {{ info.prix }}
+          {% else %}
+            Non renseigné
+          {% endif %}
+        </div>
+      {% else %}
+        <div>Aucune information renseignée.</div>
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  <!-- Bloc 2 : Infos administratives -->
+  <div class="bloc_admin">
+    <h4>📄 Suivi et acteurs</h4>
+    <div>
+      <strong>Vendeur :</strong> {{ bien.vendeur }}
+    </div>
+    <div>
+      <strong>Agent :</strong> {{ bien.agent|default:'Non assigné' }}
+    </div>
+    <div>
+      <strong>État du bien :</strong> {{ bien.get_etat_display }}
+    </div>
+  </div>
+
+  {% if with_forms %}
+    <!-- FORMULAIRE 1 : Changement d'étape -->
+    <form method="post" class="form_changement_etape mt-3 mb-3">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="changer_etape">
+        <input type="hidden" name="fait_achat_id" value="{{ fait_achat.id }}">
+
+        <label for="etape_achat_{{ fait_achat.id }}"><strong>Modifier l'étape d'achat :</strong></label>
+        <select name="etape_achat" id="etape_achat_{{ fait_achat.id }}" class="form-control">
+            {% for value, label in fait_achat.EtapeAchat.choices %}
+            <option value="{{ value }}" {% if value == fait_achat.etape_achat %}selected{% endif %}>
+                {{ label }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <button type="submit" class="btn btn-primary mt-2">💾 Enregistrer l'étape</button>
+        </form>
+
+
+        <!-- FORMULAIRE 2 : Ajouter un avis -->
+        <form method="post" class="form_avis mt-3 mb-4">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="ajouter_avis">
+        <input type="hidden" name="fait_achat_id" value="{{ fait_achat.id }}">
+
+        <label for="commentaire_{{ fait_achat.id }}"><strong>Ajouter un avis :</strong></label>
+        <textarea name="commentaire" id="commentaire_{{ fait_achat.id }}" class="form-control" rows="2"
+            placeholder="Votre avis ici..."></textarea>
+
+        <button type="submit" class="btn btn-success mt-2">➕ Enregistrer l'avis</button>
+        </form>
+  {% endif %}
+</div>

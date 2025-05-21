@@ -9,8 +9,9 @@ from django.db import connection, transaction
 from django.forms import ValidationError
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views import View
-from django.views.generic import ListView
+from django.views.generic import ListView, TemplateView
 from django.views.generic.edit import UpdateView
 
 from agence import models
@@ -22,8 +23,18 @@ from agence.forms import (
     empty_utilisateur_forms,
 )
 
-from .forms import BienForm
-from .models import Acheteur, Agent, Bien, FaitAchat, RendezVous, Utilisateur, Vendeur
+from .forms import AvisForm, BienForm, EtapeAchatForm
+from .models import (
+    Acheteur,
+    Agent,
+    Avis,
+    Bien,
+    FaitAchat,
+    ProxyUtilisateur,
+    RendezVous,
+    Utilisateur,
+    Vendeur,
+)
 
 # ---------------------------------------------------------------------------- #
 #                                     Utils                                    #
@@ -50,7 +61,6 @@ def index(request):
 #                                 Utilisateurs                                 #
 # ---------------------------------------------------------------------------- #
 
-
 class UserInfo(NamedTuple):
     id: int
     email: str
@@ -58,6 +68,15 @@ class UserInfo(NamedTuple):
     nom: str
     prenom: str
     types: str
+
+    def types_url_html(self):
+        """Retourne des liens HTML pour chaque type d'utilisateur."""
+        return ", ".join(
+            type_.url_html_cls(self.id)
+            if (type_ := ProxyUtilisateur.TYPE_UTILISATEURS.get(type_str, None))
+            else type_str
+            for type_str in self.types.split(",")
+        )
 
 
 def get_user_list():
@@ -281,12 +300,13 @@ def get_proposition_biens(acheteur):
     """
     Retourne les biens qui correspondent aux critères de recherche de l'acheteur.
     """
-    if not acheteur.critere_recherche:
-        return []
-
-    # On utilise les critères de recherche pour filtrer les biens
-    biens = acheteur.critere_recherche.bien_set.all()
-    return biens
+    critere = acheteur.critere_recherche
+    if not critere:
+        return models.Bien.objects.none()
+    biens = list(models.Bien.objects.select_related("infos_bien").all())
+    biens_scores = [(bien, critere.score_correspondance(bien.infos_bien)) for bien in biens]
+    biens_scores.sort(key=lambda x: x[1], reverse=True)
+    return [bien for bien, score in biens_scores if score > 0][:10]  # Limite à 10 biens
 
 
 def profil_acheteur(request, utilisateur_id):
@@ -305,6 +325,36 @@ def profil_acheteur(request, utilisateur_id):
         )
     context["acheteur"] = acheteur
     context["faits_achat"] = FaitAchat.objects.filter(acheteur=acheteur)
+
+    if request.method == "POST":
+        action = request.POST.get("action")
+        fait_id = request.POST.get("fait_achat_id")
+        fait = get_or_none(FaitAchat, id=fait_id)
+
+        if fait and fait.acheteur == acheteur:
+            if action == "changer_etape":
+                form = EtapeAchatForm(request.POST, instance=fait)
+
+                if form.is_valid():
+                    form.save()
+                    messages.success(request, "✅ État de l'achat mis à jour avec succès.")
+                else:
+                    messages.error(request, "⚠️ Erreur lors de la mise à jour de l'état.")
+            elif action == "ajouter_avis":
+                avis = Avis(fait_achat=fait, date=timezone.now())
+                form = AvisForm(request.POST, instance=avis)
+
+                if form.is_valid():
+                    form.save()
+                    messages.success(request, "✅ Avis ajouté avec succès.")
+                else:
+                    messages.error(request, "⚠️ Erreur lors de l'ajout de l'avis.")
+        else:
+            messages.error(request, "⚠️ Fait d'achat non trouvé ou non associé à cet acheteur.")
+
+    # Récupération des biens correspondant aux critères de recherche
+    context["proposition_biens"] = get_proposition_biens(acheteur)
+
     messages.success(request, "✅ Profil acheteur chargé avec succès.")
     return render(
         request,
@@ -345,8 +395,18 @@ def profil_agent(request, utilisateur_id):
             request, "agence/profil_agent.html", {"agent": None, "utilisateur": utilisateur}
         )
     context["agent"] = agent
-    biens = models.Bien.objects.filter(agent=agent)
-    context["biens"] = biens
+    context["biens"] = models.Bien.objects.filter(agent=agent)
+    context["acheteurs"] = (
+        models.Acheteur.objects.filter(faitachat__bien__agent=agent)
+        .distinct()
+        .order_by("utilisateur__nom", "utilisateur__prenom")
+    )
+    context["vendeurs"] = (
+        models.Vendeur.objects.filter(bien__agent=agent)
+        .distinct()
+        .order_by("utilisateur__nom", "utilisateur__prenom")
+    )
+
     # fait_achats = FaitAchat.objects.filter(agent=agent).()
     messages.success(request, "✅ Profil agent chargé avec succès.")
     return render(
@@ -393,4 +453,19 @@ class RendezVousParVendeurView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["vendeur"] = Vendeur.objects.get(utilisateur=self.kwargs["vendeur_id"])
+        return context
+
+
+class ProfilVendeurView(TemplateView):
+    template_name = "agence/profil_vendeur.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        vendeur_id = self.kwargs["vendeur_id"]
+        context["vendeur"] = Vendeur.objects.get(utilisateur=vendeur_id)
+        context["rendezvous"] = RendezVous.objects.filter(
+            fait_achat__bien__vendeur__utilisateur=vendeur_id
+        ).order_by("-date")
+        context["biens"] = Bien.objects.filter(vendeur__utilisateur=vendeur_id)
+
         return context

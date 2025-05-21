@@ -3,6 +3,7 @@ from typing import ClassVar
 from bidict import bidict
 from dal import autocomplete
 from django import forms
+from django.utils import timezone
 from phonenumber_field.formfields import PhoneNumberField
 from phonenumber_field.widgets import RegionalPhoneNumberWidget
 
@@ -64,8 +65,8 @@ class InfosBienForm(forms.ModelForm):
 class BienForm(forms.ModelForm):
     class Meta:
         model = Bien
-        fields = ["etat", "infos_bien", "vendeur", "agent"]
-        widgets = {
+        fields: ClassVar = ["etat", "infos_bien", "vendeur", "agent"]
+        widgets: ClassVar = {
             "etat": forms.Select(attrs={"class": "form-control"}),
             "infos_bien": forms.Select(attrs={"class": "form-control"}),
             "vendeur": forms.Select(attrs={"class": "form-control"}),
@@ -238,3 +239,36 @@ class AgenceForm(forms.ModelForm):
         except ValueError as e:
             raise forms.ValidationError(str(e)) from e
         return adresse
+
+# ---------------------------------------------------------------------------- #
+#                                  Fait Achats                                 #
+# ---------------------------------------------------------------------------- #
+
+
+class EtapeAchatForm(forms.ModelForm):
+    class Meta:
+        model = models.FaitAchat
+        fields: ClassVar = ["etape_achat"]
+        widgets: ClassVar = {
+            "etape_achat": forms.Select(attrs={"class": "form-control"}),
+        }
+
+
+class AvisForm(forms.ModelForm):
+    class Meta:
+        model = models.Avis
+        fields: ClassVar = ["commentaire"]
+        widgets: ClassVar = {
+            "commentaire": forms.Textarea(
+                attrs={"class": "form-control", "placeholder": "Laissez un avis ici...", "rows": 2}
+            ),
+        }
+
+    # Remplit automatiquement la date
+    def save(self, commit=True):  # noqa: FBT002
+        avis = super().save(commit=False)
+        if not avis.date:
+            avis.date = timezone.now()
+        if commit:
+            avis.save()
+        return avis

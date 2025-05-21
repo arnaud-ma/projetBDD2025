@@ -18,13 +18,11 @@
     <div class="wrapper">
       <nav>
         <a href="/agence/">Accueil</a>
+        <a href="/agence/list_users">Liste des utilisateurs</a>
         <a href="/agence/create_user">Créer un utilisateur</a>
         <a href="/agence/create_agence">Créer une agence</a>
-        <a href="/agence/list_users">Liste des utilisateurs</a>
-        <a href="/agence/acheteur">Profil Acheteur</a>
-        <a href="/agence/create_bien">Créer un bien</a>
-        <a href="/agence/agent/">Biens</a>
-        <a href="/agence/vendeur/">rendez-vous du vendeur</a>
+        {% comment %} <a href="/agence/create_bien">Créer un bien</a> {% endcomment %}
+        {% comment %} <a href="/agence/agent/">Biens</a> {% endcomment %}
       </nav>
 
       {% block content %}

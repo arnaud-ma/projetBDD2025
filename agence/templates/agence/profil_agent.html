@@ -1,15 +1,38 @@
 {% extends 'agence/base.html' %}
 
-{% block title %}Liste des biens pour l'agent {{ agent.utilisateur.nom }} {{ agent.utilisateur.prenom }} {% endblock %}
+{% block title %}
+  Liste des biens pour l'agent {{ agent.utilisateur.nom }} {{ agent.utilisateur.prenom }}
+{% endblock %}
 
 {% block content %}
-
-<ul>
+  <details>
+    <summary>Liste des biens de l'agent</summary>
     {% for bien in biens %}
-    <li> {{ bien }} </li>
+      {% include 'agence/_case_bien.html' with bien=bien %}
     {% empty %}
-    <li>Aucun bien trouvé pour cet agent.</li>
+      Aucun bien trouvé pour cet agent.
     {% endfor %}
-</ul>
+  </details>
+  <details>
+    <summary>Portefeuille acheteur</summary>
+    <ul>
+      {% for user in acheteurs %}
+      <li> <a href="{{ user.url|safe }}"> {{ user.utilisateur.nom | capfirst}} {{user.utilisateur.prenom |capfirst}} </a> </li>
+       {% empty %}
+       <li> Aucun user </li>
+     {% endfor %}
+    </ul>
+  </details>
 
+
+  <details>
+    <summary>Portefeuille vendeur</summary>
+    <ul>
+      {% for user in vendeurs %}
+      <li> <a href="{{ user.url|safe }}"> {{ user.utilisateur.nom | capfirst}} {{user.utilisateur.prenom |capfirst}} </li>
+       {% empty %}
+       <li> Aucun user </li>
+     {% endfor %}
+    </ul>
+  </details>
 {% endblock %}

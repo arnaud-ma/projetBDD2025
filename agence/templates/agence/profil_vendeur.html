@@ -1,0 +1,31 @@
+{% extends 'agence/base.html' %}
+{% block title %}
+  Profil Vendeur
+{% endblock %}
+{% block content %}
+  <div class="profil_vendeur">
+    <h1>Profil du vendeur {{ vendeur.utilisateur.nom }}</h1>
+    <details>
+      <summary>Liste des biens du vendeur</summary>
+      {% for bien in biens %}
+        {% include 'agence/_case_bien.html' with bien=bien %}
+      {% empty %}
+        Aucun bien enregistré
+      {% endfor %}
+    </details>
+    <details>
+      <summary>Liste des rendez-vous du vendeur</summary>
+      <ul>
+        {% for rdv in rendezvous_list %}
+          <li>
+            {{ rdv.date|date:'d/m/Y H:i' }} – {{ rdv.objet }}<br />
+            Lieu : {{ rdv.lieu }}<br />
+            Commentaire : {{ rdv.commentaire|default:'Aucun' }}
+          </li>
+        {% empty %}
+          <li>Aucun rendez-vous trouvé.</li>
+        {% endfor %}
+      </ul>
+    </details>
+  </div>
+{% endblock %}
